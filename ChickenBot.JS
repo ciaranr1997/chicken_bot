@@ -48,20 +48,6 @@ client.on('message', msg => {
                         msg.channel.send("Cluck Cluck");
                 }
 
-                /*if(chat.includes(config.prefix+"poll"))
-                {
-                    chat = chat.replace(config.prefix+"poll","");
-                    msg.reply("Please Provide Your Options (separate with a new line)");
-                     const collector = new Discord.MessageCollector(msg.channel, m => m.author.id === msg.author.id, { time: 10000 });
-                    collector.on('collect', message => {
-                        parts = message.content.split("\n");
-                        console.log(parts.length);
-                        for(i=0;i<parts.length; i++)
-                        {
-                            debug.send(parts[i]);
-                        }
-                    });
-                }*/
                 if(chat=="!fhelp")
                 {
                     msg.reply("Ciaran hasn't programmed this in yet. Tell him to get a move on!");
@@ -105,7 +91,7 @@ client.on('message', msg => {
                     console.log("Year: "+year);
                     tmdb.movieSearch(movie,returnMovies,year,msg);
                 }
-
+                
             } 
             else 
             {
@@ -144,7 +130,7 @@ client.on("messageDelete", async function (messageDelete) {
     now = Date.now()/1000;
     sql.debug = debug;
     sql.connect();
-    sql.insert("INSERT INTO messages_deleted (message_content,user_tag,user_id,timestamp,message_sent,channel_name) VALUES(?,?,?,?,?,?)",[messageDelete.content,messageDelete.author.tag,messageDelete.author.id,now,messageDelete.createdTimestamp,messageDelete.channel.name]);
+    sql.run("INSERT INTO messages_deleted (message_content,user_tag,user_id,timestamp,message_sent,channel_name) VALUES(?,?,?,?,?,?)",[messageDelete.content,messageDelete.author.tag,messageDelete.author.id,now,messageDelete.createdTimestamp,messageDelete.channel.name]);
     sql.close();
 });
 
@@ -159,7 +145,7 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
     now = Date.now()/1000;
     sql.debug = debug;
     sql.connect();
-    sql.insert("INSERT INTO messages_edited (old_content,new_content,user_tag,user_id,timestamp,channel_name) VALUES(?,?,?,?,?,?)",
+    sql.run("INSERT INTO messages_edited (old_content,new_content,user_tag,user_id,timestamp,channel_name) VALUES(?,?,?,?,?,?)",
     [oldMessage.content,newMessage.content,oldMessage.author.tag,oldMessage.author.id,now,oldMessage.channel.name]);
     sql.close();
 });
@@ -274,7 +260,7 @@ function schedule(moveparams,msg)
             /*let sql = require("./sql.js")
                 sql.debug = debug;
                 sql.connect();
-                sql.insert("SELECT * FROM movie_nights" );
+                sql.run("SELECT * FROM movie_nights" );
                 sql.close();*/
         })
     });
@@ -327,8 +313,7 @@ function returnMovies(data,msg)
     }
    
 }
-
-function hug(message)
+function getMention(message)
 {
     const withoutPrefix = message.content.slice(config.prefix.length);
 	const split = withoutPrefix.split(/ +/);
@@ -342,10 +327,16 @@ function hug(message)
 		if (mention.startsWith('!')) {
 			mention = mention.slice(1);
 		}
-
-		message.channel.send("The coop sends their virtual hugs <@"+mention+"> <:FowlHeart:713701989707546634>");
-        message.delete();
-	}
+        return mention
+    }
+}
+function hug(message)
+{
+    mention = getMention(message);
+	if (!mention) return;
+    message.channel.send("The coop sends their virtual hugs <@"+mention+"> <:FowlHeart:713701989707546634>");
+    message.delete();
+	
 }
 function HourlyCheck()
 {
