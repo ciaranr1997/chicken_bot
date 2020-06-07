@@ -8,7 +8,7 @@ var me;
 var audRole;
 client.login(config.token);
 
-client.on('message', msg => {
+client.on('message', async msg => {
 	if(!msg.author.bot)
 	{ 
         if(msg.guild==null)
@@ -47,7 +47,7 @@ client.on('message', msg => {
                 if(chat==="!ping"){
                         msg.channel.send("Cluck Cluck");
                 }
-
+                
                 if(chat=="!fhelp")
                 {
                     msg.reply("Ciaran hasn't programmed this in yet. Tell him to get a move on!");
@@ -90,6 +90,62 @@ client.on('message', msg => {
                     console.log("Movie: " +movie);
                     console.log("Year: "+year);
                     tmdb.movieSearch(movie,returnMovies,year,msg);
+                }
+                if(chat.includes(config.prefix+"quote"))
+                {
+                    men = getMention(msg);
+                    mention = client.users.fetch(men);
+                    messages = await msg.channel.messages.fetch(mention.lastMessageID);
+                    messages = messages.array();
+                    output = "Please select the quote from the below list\n";
+                    u=0;
+                    options = ["_"];//dummy null entry to make life easier
+                    for(i=0;i<messages.length;i++)
+                    {
+                        
+                        if(messages[i].author.id==men)
+                        {
+                            u++;
+                            options[u] = messages[i].content;
+                            output+="**"+u+"** "+messages[i].content+"\n----------\n";
+                            if(u==5)
+                            {
+                                break;
+                            }
+                        }
+                    }
+                    if(u==0)
+                    {
+                        msg.reply("Sorry no messages for this user have been found in this channel");
+                        return;
+                    }
+                    output+="type 'cancel' to stop";
+                    msg.reply(output).then(sent => { // 'sent' is that message you just sent
+                        const collector = new Discord.MessageCollector(msg.channel, m => m.author.id === msg.author.id, { time: 30000 });
+
+                        collector.on('collect', message => {
+                            if(!message.content.includes("cancel"))
+                            {  
+                                msg.reply("You have selected "+options[message.content]);
+                                console.log("Test - "+message.content);
+                                quote = options[message.content];
+                                let sql = require("./sql.js")
+                                sql.debug = debug;
+                                sql.connect();
+                                sql.run("INSERT INTO fowl_quotes (user_id,quote) VALUES(?,?)",[men,quote]);
+                                sql.close();
+                            } 
+                            else 
+                            {
+                                msg.reply("Okay :)");
+                            }
+                            sent.delete();
+                            message.delete();
+                            msg.delete();   
+                            collector.stop();
+                        })
+                    });
+                    
                 }
                 
             } 
