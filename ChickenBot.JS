@@ -32,6 +32,7 @@ client.on('message', async msg => {
                     sql.run("UPDATE fowl_quotes set user_id=0 where id="+qid+" AND user_id='"+msg.author.id+"'" );
                     sql.run("INSERT INTO redacted_quotes (quote_id,user_id) VALUES ("+qid+",'"+msg.author.id+"')" );
                     sql.close();
+                    msg.reply("I have redacted this quote for you. If you require further action on this please DM a member of the mod team for this to be resolved");
                 }
             }
         }
