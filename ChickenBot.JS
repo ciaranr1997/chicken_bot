@@ -8,11 +8,15 @@ var me;
 var audRole;
 client.login(config.token);
 
+
+/***********************
+*****DISCORD EVENTS*****
+***********************/
 client.on('message', async msg => {
 	if(!msg.author.bot)
 	{ 
         if(msg.guild==null)
-        {
+        {//Code for DM management
             chat = msg.content;
             if(chat.charAt(0)===config.prefix){
                 if(chat==config.prefix+"myquotes")
@@ -26,12 +30,7 @@ client.on('message', async msg => {
                 if(chat.includes(config.prefix+"redact"))
                 {
                     qid = msg.content.replace(config.prefix+"redact ","");
-                    let sql = require("./sql.js")
-                    sql.debug = debug;
-                    sql.connect();
-                    sql.run("UPDATE fowl_quotes set user_id=0 where id="+qid+" AND user_id='"+msg.author.id+"'" );
-                    sql.run("INSERT INTO redacted_quotes (quote_id,user_id) VALUES ("+qid+",'"+msg.author.id+"')" );
-                    sql.close();
+                    redactQuote(quid)
                 }
             }
         }
@@ -159,22 +158,6 @@ client.on('message', async msg => {
 	} 
 });
 
-async function sayQuote(msg,rows)
-{
-    if(rows[0].user_id=="0")
-    {
-        user = "_redacted_";
-    }
-    else if(!msg.guild.members.cache.get(rows[0].user_id))
-   {
-        user = await client.users.fetch(rows[0].user_id);
-       user = user.username;
-   } else 
-   {
-       user = msg.guild.members.cache.get(rows[0].user_id).displayName + " ("+msg.guild.members.cache.get(rows[0].user_id).user.tag+")";
-   }
-    msg.channel.send("> "+rows[0].quote+"\n - "+user+"");
-}
 ///Log message deletions
 client.on("messageDelete", async function (messageDelete) {
  console.log(`The message : "${messageDelete.content}" by ${messageDelete.author.tag} was deleted.`)
@@ -276,6 +259,10 @@ client.on('ready', () => {
 });
 
 
+
+/***********************
+*********MOVIES*********
+***********************/
 function schedule(moveparams,msg)
 {
     let resp = msg.reply("When would you like to schedule a movie night?").then(sent => { // 'sent' is that message you just sent
@@ -369,6 +356,15 @@ function returnMovies(data,msg)
     }
    
 }
+
+
+
+
+
+
+/***********************
+*********UTILS**********
+***********************/
 function getMention(message)
 {
     const withoutPrefix = message.content.slice(config.prefix.length);
@@ -386,14 +382,9 @@ function getMention(message)
         return mention
     }
 }
-function hug(message)
-{
-    mention = getMention(message);
-	if (!mention) return;
-    message.channel.send("The coop sends their virtual hugs <@"+mention+"> <:FowlHeart:713701989707546634>");
-    message.delete();
-	
-}
+
+
+//the hourly checks to be run
 function HourlyCheck()
 {
     /*let sql = require("./sql.js")
@@ -423,12 +414,12 @@ function movieSoon(rows)
     }
 }
 
-function processTest(rows)
-{
-    console.log("Running test processing");
-    console.log(rows);
-}
 
+
+
+/***********************
+*********PERMS**********
+***********************/
 function canUseBot(member)
 {
     botPerms = false;
@@ -464,6 +455,10 @@ function isMod(member)
     return botPerms;
 }
 
+
+/***********************
+*********QUOTES*********
+***********************/
 function ListQuotes(msg,rows)
 {
     if(rows.length==0)
@@ -478,4 +473,52 @@ function ListQuotes(msg,rows)
     }
     console.log(output);
     msg.reply(output);
+}
+function redactQuote(quid)
+{
+    let sql = require("./sql.js")
+    sql.debug = debug;
+    sql.connect();
+    sql.run("UPDATE fowl_quotes set user_id=0 where id="+qid+" AND user_id='"+msg.author.id+"'" );
+    sql.run("INSERT INTO redacted_quotes (quote_id,user_id) VALUES ("+qid+",'"+msg.author.id+"')" );
+    sql.close();
+    msg.reply("I have redacted this quote for you. If you require further action on this please DM a member of the mod team for this to be resolved");
+}
+
+async function sayQuote(msg,rows)
+{
+    if(rows[0].user_id=="0")
+    {
+        user = "_redacted_";
+    }
+    else if(!msg.guild.members.cache.get(rows[0].user_id))
+   {
+        user = await client.users.fetch(rows[0].user_id);
+       user = user.username;
+   } else 
+   {
+       user = msg.guild.members.cache.get(rows[0].user_id).displayName + " ("+msg.guild.members.cache.get(rows[0].user_id).user.tag+")";
+   }
+    msg.channel.send("> "+rows[0].quote+"\n - "+user+"");
+}
+
+/***********************
+*********MISC**********
+***********************/
+function hug(message)
+{
+    mention = getMention(message);
+	if (!mention) return;
+    message.channel.send("The coop sends their virtual hugs <@"+mention+"> <:FowlHeart:713701989707546634>");
+    message.delete();
+	
+}
+
+/***********************
+********TESTING*********
+***********************/
+function processTest(rows)
+{
+    console.log("Running test processing");
+    console.log(rows);
 }
