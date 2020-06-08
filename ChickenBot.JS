@@ -1,3 +1,6 @@
+/***********************
+******SETUP STUFF*******
+***********************/
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const config = require("./config.json");
@@ -12,13 +15,17 @@ client.login(config.token);
 /***********************
 *****DISCORD EVENTS*****
 ***********************/
+
+//discord client has recieved a message event
 client.on('message', async msg => {
 	if(!msg.author.bot)
-	{ 
+	{
         if(msg.guild==null)
-        {//Code for DM management
+        {
+            //Code for DM management
             chat = msg.content;
-            if(chat.charAt(0)===config.prefix){
+            if(chat.charAt(0)===config.prefix)
+            {
                 if(chat==config.prefix+"myquotes")
                 {
                     let sql = require("./sql.js")
@@ -34,128 +41,85 @@ client.on('message', async msg => {
                 }
             }
         }
-        else 
+        else
         {
             chat = msg.content;
-		if(chat.charAt(0)===config.prefix){
-            if(canUseBot(msg.member))
+            if(chat.charAt(0)===config.prefix)
             {
-                author = msg.author.username;
-                channel = msg.channel;
-                lc = chat.toLowerCase();
-                if(chat==="!ping"){
-                        msg.channel.send("Cluck Cluck");
-                }
-                
-                if(chat=="!fhelp")
+                if(canUseBot(msg.member))
                 {
-                    msg.reply("Ciaran hasn't programmed this in yet. Tell him to get a move on!");
-                }
-                if(chat.includes(config.prefix+"rquote"))
-                {
-                   let sql = require("./sql.js")
-                    
-                    sql.debug = debug;
-                    sql.connect();
-                    sql.query("SELECT * FROM fowl_quotes ORDER BY RANDOM() LIMIT 1",sayQuote,msg);
-                    sql.close();
-                }
-                if(chat.includes(config.prefix+"lquote"))
-                {
-                   let sql = require("./sql.js")
-                    
-                    sql.debug = debug;
-                    sql.connect();
-                    sql.query("SELECT * FROM fowl_quotes ORDER BY id desc LIMIT 1",sayQuote,msg);
-                    sql.close();
-                }
-                if(chat.includes(config.prefix+"hug"))
-                {
-                    hug(msg);
-                }
-                if(chat.includes(config.prefix+"schedule"))
-                {
-                    let tmdb = require("./moviedb.js");
-                    chat = chat.replace(config.prefix+"schedule ","");
-                    year = chat.match(/\(\d\d\d\d\)/);
-                    if(year)
-                    {
-                        movie = chat.replace(year,"");
-                        year = year[0].substring(1,5);
-                    } else 
-                    {
-                        movie = chat;
-                    }
-                    console.log("Movie: " +movie);
-                    console.log("Year: "+year);
-                    tmdb.movieSearch(movie,returnMovies,year,msg);
-                }
-                if(chat.includes(config.prefix+"quote"))
-                {
-                    men = getMention(msg);
-                    mention = client.users.fetch(men);
-                    messages = await msg.channel.messages.fetch(mention.lastMessageID);
-                    messages = messages.array();
-                    output = "Please select the quote from the below list\n";
-                    u=0;
-                    options = ["_"];//dummy null entry to make life easier
-                    for(i=0;i<messages.length;i++)
-                    {
-                        
-                        if(messages[i].author.id==men)
-                        {
-                            u++;
-                            options[u] = messages[i].content;
-                            output+="**"+u+"** "+messages[i].content+"\n----------\n";
-                            if(u==5)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                    if(u==0)
-                    {
-                        msg.reply("Sorry no messages for this user have been found in this channel");
-                        return;
-                    }
-                    output+="type 'cancel' to stop";
-                    msg.reply(output).then(sent => { // 'sent' is that message you just sent
-                        const collector = new Discord.MessageCollector(msg.channel, m => m.author.id === msg.author.id, { time: 30000 });
 
-                        collector.on('collect', message => {
-                            if(!message.content.includes("cancel"))
-                            {  
-                                msg.reply("You have selected "+options[message.content]);
-                                console.log("Test - "+message.content);
-                                quote = options[message.content];
-                                let sql = require("./sql.js")
-                                sql.debug = debug;
-                                sql.connect();
-                                sql.run("INSERT INTO fowl_quotes (user_id,quote) VALUES(?,?)",[men,quote]);
-                                sql.close();
-                            } 
-                            else 
-                            {
-                                msg.reply("Okay :)");
-                            }
-                            sent.delete();
-                            message.delete();
-                            msg.delete();   
-                            collector.stop();
-                        })
-                    });
-                    
+                    //ping check, just make sure the bot is alive :)
+                    if(chat==="!ping"&&isMod(msg.member)){
+                            msg.channel.send("Cluck Cluck");
+                    }
+
+                    //seriously, get on this!
+                    if(config.prefix+chat=="fhelp")
+                    {
+                        msg.reply("Ciaran hasn't programmed this in yet. Tell him to get a move on!");
+                    }
+
+                    //rquote command
+                    if(chat.includes(config.prefix+"rquote"))
+                    {
+                       let sql = require("./sql.js")
+                        sql.debug = debug;
+                        sql.connect();
+                        sql.query("SELECT * FROM fowl_quotes ORDER BY RANDOM() LIMIT 1",sayQuote,msg);
+                        sql.close();
+                    }
+
+                    //lquote command
+                    if(chat.includes(config.prefix+"lquote"))
+                    {
+                       let sql = require("./sql.js")
+
+                        sql.debug = debug;
+                        sql.connect();
+                        sql.query("SELECT * FROM fowl_quotes ORDER BY id desc LIMIT 1",sayQuote,msg);
+                        sql.close();
+                    }
+
+                    //hug command
+                    if(chat.includes(config.prefix+"hug"))
+                    {
+                        hug(msg);
+                    }
+
+                    //schedule a new movie night
+                    if(chat.includes(config.prefix+"schedule"))
+                    {
+                        let tmdb = require("./moviedb.js");
+                        chat = chat.replace(config.prefix+"schedule ","");
+                        year = chat.match(/\(\d\d\d\d\)/);
+                        if(year)
+                        {
+                            movie = chat.replace(year,"");
+                            year = year[0].substring(1,5);
+                        } else
+                        {
+                            movie = chat;
+                        }
+                        console.log("Movie: " +movie);
+                        console.log("Year: "+year);
+                        tmdb.movieSearch(movie,returnMovies,year,msg);
+                    }
+                    //add a new quote
+                    if(chat.includes(config.prefix+"quote"))
+                    {
+                        addQuote(msg)
+                    }
+
                 }
-                
-            } 
-            else 
-            {
-                
+                else
+                {
+
+                }
             }
-		}
         }
-		
-	} 
+
+	}
 });
 
 ///Log message deletions
@@ -169,7 +133,16 @@ client.on("messageDelete", async function (messageDelete) {
     now = Date.now()/1000;
     sql.debug = debug;
     sql.connect();
-    sql.run("INSERT INTO messages_deleted (message_content,user_tag,user_id,timestamp,message_sent,channel_name) VALUES(?,?,?,?,?,?)",[messageDelete.content,messageDelete.author.tag,messageDelete.author.id,now,messageDelete.createdTimestamp,messageDelete.channel.name]);
+    sql.run(
+			"INSERT INTO messages_deleted (message_content,user_tag,user_id,timestamp,message_sent,channel_name) VALUES(?,?,?,?,?,?)",
+			[
+				messageDelete.content,
+				messageDelete.author.tag,
+				messageDelete.author.id,
+				now,messageDelete.createdTimestamp,
+				messageDelete.channel.name
+			]
+		);
     sql.close();
 });
 
@@ -184,32 +157,46 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
     now = Date.now()/1000;
     sql.debug = debug;
     sql.connect();
-    sql.run("INSERT INTO messages_edited (old_content,new_content,user_tag,user_id,timestamp,channel_name) VALUES(?,?,?,?,?,?)",
-    [oldMessage.content,newMessage.content,oldMessage.author.tag,oldMessage.author.id,now,oldMessage.channel.name]);
+    sql.run(
+			"INSERT INTO messages_edited (old_content,new_content,user_tag,user_id,timestamp,channel_name) VALUES(?,?,?,?,?,?)",
+    	[
+				oldMessage.content,
+				newMessage.content,
+				oldMessage.author.tag,
+				oldMessage.author.id,
+				now,
+				oldMessage.channel.name
+			]
+		);
     sql.close();
 });
 
 
-/// This managed the voice roles for users 
+/// This managed the voice roles for users
 /// Who join the movie channels
 /// And gives them access to the text channel
 client.on('voiceStateUpdate', (oldState, newState) => {
+
 	newMember = newState.member;
 	oldMember = oldState.member;
-	
+
 	let newUserChannel = newState.channel;
 	let oldUserChannel = oldState.channel;
+
 	if(newUserChannel!==oldUserChannel)
 	{
-	   if(oldUserChannel === null && newUserChannel !== null) {
-		channelName = newUserChannel.name;
-		channelID = newUserChannel.id;
-		if(channelID==config.movie_channel||channelID==config.after_movie)
+	  if(oldUserChannel === null && newUserChannel !== null)
+		{ //user has joined a voice channel
+			channelName = newUserChannel.name;
+			channelID = newUserChannel.id;
+			if(channelID==config.movie_channel||channelID==config.after_movie)
+			{
+				newMember.roles.add(config.audience);
+			}
+
+	  }
+		else if(newUserChannel === null)// user has left voice
 		{
-			newMember.roles.add(config.audience);
-		}
-		
-	  } else if(newUserChannel === null){
 
 			channelName = oldUserChannel.name;
 			channelID = oldUserChannel.id;
@@ -217,45 +204,48 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 			{
 				oldMember.roles.remove(config.audience);
 			}
-	  } else 
+
+	  }
+		else //user has moved from one channel to the other
 	  {
-		  try 
+			//sometimes things bug out here, best to put in a try/catch to be safe
+		  try
 		  {
-			  
-			channelName = newUserChannel.name;
-			channelID = newUserChannel.id;
-			if(channelID==config.movie_channel||channelID==config.after_movie)
-			{
-				newMember.roles.add(config.audience);
-			} else 
-			{
-				newMember.roles.remove(config.audience);
-			}
+				channelName = newUserChannel.name;
+				channelID = newUserChannel.id;
+				if(channelID==config.movie_channel||channelID==config.after_movie)
+				{
+					newMember.roles.add(config.audience);
+				}
+				else
+				{
+					newMember.roles.remove(config.audience);
+				}
 		  }
-		  catch 
+		  catch
 		  {
 			  newMember.roles.remove(config.audience);
 		  }
 	  }
-	  
+
 	}
 
- 
+
 });
 
+//Bot is logged in to discord now.
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 	//const guild = client.guilds.get(config.server_id);
     debug = client.channels.cache.get(config.debug_channel);
 	movieAnnounce = client.channels.cache.get(config.movie_announce);
 	//client.user.setStatus('busy');
-    client.user.setPresence({activity:{ name: 'Watching over the coop. !fhelp' }, status: 'idle'});
+    client.user.setPresence({activity:{ name: 'Watching over the coop. '+config.prefix+'fhelp' }, status: 'available'});
 	debug.send("I'm awake!");
     var d = new Date();
     var n = d.getMinutes();
     offset = (60-n)*60000;
     setTimeout(HourlyCheck,offset);
-	//audRole = guild.roles.find(role => role.name === config.audienceName);
 });
 
 
@@ -263,6 +253,8 @@ client.on('ready', () => {
 /***********************
 *********MOVIES*********
 ***********************/
+
+//schedule the movie for the movie night and put in the announcement
 function schedule(moveparams,msg)
 {
     let resp = msg.reply("When would you like to schedule a movie night?").then(sent => { // 'sent' is that message you just sent
@@ -309,6 +301,7 @@ function schedule(moveparams,msg)
     });
 }
 
+//Get the list of movies for the user to select from
 function returnMovies(data,msg)
 {
     console.log(data);
@@ -319,25 +312,25 @@ function returnMovies(data,msg)
          {
              //ask for start time
              schedule(movies[0],msg);
-         } 
-        else 
+         }
+        else
          {
              response = "There are more than one movies found. Please pick from the top results by replying with the id (in bold)\n\n";
              for(i=0; i<movies.length; i++)
              {
                  response+= "**"+movies[i].id+"** "+movies[i].title+" "+movies[i].release_date+"\n";
-                 
+
              }
              response+="\nIf the movie you have requested does not show type _'cancel'_ and try again with a more specific query";
             msg.reply(response).then(sent => { // 'sent' is that message you just sent
                 const collector = new Discord.MessageCollector(msg.channel, m => m.author.id === msg.author.id, { time: 30000 });
-             
+
                 collector.on('collect', message => {
                     if(!message.content.includes("cancel"))
-                    {  
+                    {
                         let movieRequest =  require("./moviedb.js");
                         movieRequest.movieById(message.content,msg,schedule);
-                    } else 
+                    } else
                     {
                         msg.reply("Okay :)");
                     }
@@ -346,18 +339,16 @@ function returnMovies(data,msg)
                     collector.stop();
                 })
             });
-            
-            
+
+
          }
     }
-    else 
+    else
     {
         msg.reply("I can't find that movie. Please try again :(");
     }
-   
+
 }
-
-
 
 
 
@@ -390,9 +381,9 @@ function HourlyCheck()
     /*let sql = require("./sql.js")
     sql.debug = debug;
     sql.connect();
-					
-                    
-					
+
+
+
     now = Date.now()/1000;
     hour3 = now+ (3*3600);
     oldMovies = "SELECT * FROM movie_nights WHERE starttime<"
@@ -410,7 +401,7 @@ function movieSoon(rows)
 {
     for(i=0; i < rows.length; i++)
     {
-        
+
     }
 }
 
@@ -428,13 +419,13 @@ function canUseBot(member)
         if(role==highestRole.id)
            {
             botPerms = true;
-           } 
+           }
     });
     config.bot_allowed.forEach(function(role){
         if(role==highestRole.id)
            {
             botPerms = true;
-           } 
+           }
     });
     if(member.user.id=="663320071237664779")
     {
@@ -450,7 +441,7 @@ function isMod(member)
         if(role==highestRole.id)
            {
             botPerms = true;
-           } 
+           }
     });
     return botPerms;
 }
@@ -459,6 +450,67 @@ function isMod(member)
 /***********************
 *********QUOTES*********
 ***********************/
+
+//Get quotes from the mentioned user and add it to the quotes database
+function addQuote(msg)
+{
+    men = getMention(msg);
+    if(!men) return;
+    mention = client.users.fetch(men);
+    messages = await msg.channel.messages.fetch(mention.lastMessageID);
+    messages = messages.array();
+    output = "Please select the quote from the below list\n";
+    u=0;
+    options = ["_"];//dummy null entry to make life easier for the user
+    for(i=0;i<messages.length;i++)
+    {
+
+        if(messages[i].author.id==men)
+        {
+            u++;
+            options[u] = messages[i].content;
+            output+="**"+u+"** "+messages[i].content+"\n----------\n";
+            if(u==5)
+            {
+                break;
+            }
+        }
+    }
+    if(u==0)
+    {
+        msg.reply("Sorry no messages for this user have been found in this channel");
+        return;
+    }
+    output+="type 'cancel' to stop";
+    msg.reply(output).then(sent => { // 'sent' is that message you just sent
+        const collector = new Discord.MessageCollector(msg.channel, m => m.author.id === msg.author.id, { time: 30000 });
+
+        collector.on('collect', message => {
+            if(!message.content.includes("cancel"))
+            {
+                msg.reply("You have selected "+options[message.content]);
+                console.log("Test - "+message.content);
+                quote = options[message.content];
+                let sql = require("./sql.js")
+                sql.debug = debug;
+                sql.connect();
+                sql.run("INSERT INTO fowl_quotes (user_id,quote) VALUES(?,?)",[men,quote]);
+                sql.close();
+            }
+            else
+            {
+                msg.reply("Okay :)");
+            }
+            sent.delete();
+            message.delete();
+            msg.delete();
+            collector.stop();
+        })
+    });
+
+}
+
+//get the user's quotes in DMs to allow them to be redacted
 function ListQuotes(msg,rows)
 {
     if(rows.length==0)
@@ -474,6 +526,8 @@ function ListQuotes(msg,rows)
     console.log(output);
     msg.reply(output);
 }
+
+//Take the quote mentioned and update it to remove the link to the user
 function redactQuote(quid)
 {
     let sql = require("./sql.js")
@@ -485,6 +539,7 @@ function redactQuote(quid)
     msg.reply("I have redacted this quote for you. If you require further action on this please DM a member of the mod team for this to be resolved");
 }
 
+//Say the quote that has been retrieved from the database
 async function sayQuote(msg,rows)
 {
     if(rows[0].user_id=="0")
@@ -495,7 +550,7 @@ async function sayQuote(msg,rows)
    {
         user = await client.users.fetch(rows[0].user_id);
        user = user.username;
-   } else 
+   } else
    {
        user = msg.guild.members.cache.get(rows[0].user_id).displayName + " ("+msg.guild.members.cache.get(rows[0].user_id).user.tag+")";
    }
@@ -511,7 +566,7 @@ function hug(message)
 	if (!mention) return;
     message.channel.send("The coop sends their virtual hugs <@"+mention+"> <:FowlHeart:713701989707546634>");
     message.delete();
-	
+
 }
 
 /***********************
