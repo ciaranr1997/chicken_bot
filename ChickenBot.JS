@@ -56,7 +56,7 @@ client.on('message', async msg => {
 										if(chat==="!trailer"&&isMod(msg.member))
 										{
 												let tmdb = require("./moviedb.js");
-												trailers = await tmdb.getTrailer(588,msg);
+												trailers = await tmdb.getTrailer({id:588},msg,getTrailer);
 
 										}
 
@@ -289,14 +289,30 @@ function schedule(movieparams,msg)
                     "name": "Overview",
                     "value": movieparams.overview
                   },
-                  {
-                    "name": "Runtime",
-                    "value": movieparams.runtime+" minutes"
-                  }
                 ]
               }
             }
             collector.stop();
+						if(movieparams.runtime!=null)
+						{
+							announcement.embed.fields.push(
+								{
+									"name": "Runtime",
+									"value": movieparams.runtime+" minutes"
+								}
+							);
+						}
+						if(movieparams.trailer!=null)
+						{
+							announcement.embed.fields.push(
+								{
+									"name": "Trailer",
+									"value": movieparams.trailer
+								}
+
+							);
+						}
+
             movieAnnounce.send(announcement);
             message.delete();
             msg.delete();
@@ -321,7 +337,8 @@ function returnMovies(data,msg)
          if(movies.length  === 1)
          {
              //ask for start time
-             schedule(movies[0],msg);
+						 let movieRequest =  require("./moviedb.js");
+             schedule(movies[0],msg,getTrailer);
          }
         else
          {
@@ -331,15 +348,15 @@ function returnMovies(data,msg)
                  response+= "**"+movies[i].id+"** "+movies[i].title+" "+movies[i].release_date+"\n";
 
              }
-             response+="\nIf the movie you have requested does not show type _'cancel'_ and try again with a more specific query";
-            msg.reply(response).then(sent => { // 'sent' is that message you just sent
+             	response+="\nIf the movie you have requested does not show type _'cancel'_ and try again with a more specific query";
+            	msg.reply(response).then(sent => { // 'sent' is that message you just sent
                 const collector = new Discord.MessageCollector(msg.channel, m => m.author.id === msg.author.id, { time: 30000 });
 
                 collector.on('collect', message => {
                     if(!message.content.includes("cancel"))
                     {
                         let movieRequest =  require("./moviedb.js");
-                        movieRequest.movieById(message.content,msg,schedule);
+                        movieRequest.movieById(message.content,msg,getTrailer);
                     } else
                     {
                         msg.reply("Okay :)");
@@ -361,9 +378,27 @@ function returnMovies(data,msg)
 }
 
 //get the trailer of a movie
-function getTrailer(movieparams,msg,videos)
+function getTrailer(movieparams,msg,data)
 {
-	
+	console.log("data");
+	console.log(data);
+	videos = data.results;
+		console.log("results");
+	console.log(videos);
+	if(videos.length==0)
+	{
+		return;
+	}
+	trailer = "";
+	for(i=0;i<videos.length;i++)
+	{
+		if(videos[i].type=="Trailer"&&videos[i].site=="YouTube")
+		{
+			trailer = "https://www.youtube.com/watch?v="+videos[i].key
+			break;
+		}
+	}
+	movieparams.trailer = trailer;
 	schedule(movieparams,msg);
 }
 

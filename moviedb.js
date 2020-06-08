@@ -37,16 +37,18 @@ module.exports = {
 
 
           resp.on('end', () => {
-            callback(JSON.parse(data),msg);
+            console.log("movieById");
+            console.log(JSON.parse(data))
+            this.getTrailer(JSON.parse(data),msg,callback);
           });
 
         }).on("error", (err) => {
           console.log("Error: " + err.message);
         });
     },
-    getTrailer:async function(movieId,msg,callback)
+    getTrailer:async function(movieparams,msg,callback)
     {
-      source = "https://api.themoviedb.org/3/movie/"+movieId+"/videos?api_key="+config.movie_db_api+"&language=en-US"
+      source = "https://api.themoviedb.org/3/movie/"+movieparams.id+"/videos?api_key="+config.movie_db_api+"&language=en-US"
       https.get(source, (resp) => {
       let data = '';
 
@@ -58,8 +60,7 @@ module.exports = {
 
         resp.on('end', () => {
           json = JSON.parse(data);
-          console.log(json);
-          msg.reply("https://www.youtube.com/watch?v="+json.results[0].key);
+          callback(movieparams,msg,json);
         });
 
       }).on("error", (err) => {
