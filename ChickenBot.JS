@@ -53,6 +53,12 @@ client.on('message', async msg => {
                     if(chat==="!ping"&&isMod(msg.member)){
                             msg.channel.send("Cluck Cluck");
                     }
+										if(chat==="!trailer"&&isMod(msg.member))
+										{
+												let tmdb = require("./moviedb.js");
+												trailers = await tmdb.getTrailer(588,msg);
+
+										}
 
                     //seriously, get on this!
                     if(config.prefix+chat=="fhelp")
@@ -255,7 +261,7 @@ client.on('ready', () => {
 ***********************/
 
 //schedule the movie for the movie night and put in the announcement
-function schedule(moveparams,msg)
+function schedule(movieparams,msg)
 {
     let resp = msg.reply("When would you like to schedule a movie night?").then(sent => { // 'sent' is that message you just sent
         const collector = new Discord.MessageCollector(msg.channel, m => m.author.id === msg.author.id, { time: 30000 });
@@ -263,12 +269,12 @@ function schedule(moveparams,msg)
            const startdate = Date.parse(message)/1000;
             announcement = {
               "embed": {
-                "title": moveparams.title,
-                "description": "Join the coop in a movie night to watch \n**"+moveparams.title+"**",
-                "url": "https://www.themoviedb.org/movie/"+moveparams.id,
+                "title": movieparams.title,
+                "description": "Join the coop in a movie night to watch \n**"+movieparams.title+"**",
+                "url": "https://www.themoviedb.org/movie/"+movieparams.id,
                 "color": 980195,
                 "thumbnail": {
-                  "url": "https://image.tmdb.org/t/p/original"+moveparams.poster_path
+                  "url": "https://image.tmdb.org/t/p/original"+movieparams.poster_path
                 },
                 "fields": [
                   {
@@ -281,7 +287,11 @@ function schedule(moveparams,msg)
                   },
                   {
                     "name": "Overview",
-                    "value": moveparams.overview
+                    "value": movieparams.overview
+                  },
+                  {
+                    "name": "Runtime",
+                    "value": movieparams.runtime+" minutes"
                   }
                 ]
               }
@@ -350,7 +360,12 @@ function returnMovies(data,msg)
 
 }
 
-
+//get the trailer of a movie
+function getTrailer(movieparams,msg,videos)
+{
+	
+	schedule(movieparams,msg);
+}
 
 
 /***********************
