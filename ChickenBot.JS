@@ -452,7 +452,7 @@ function isMod(member)
 ***********************/
 
 //Get quotes from the mentioned user and add it to the quotes database
-function addQuote(msg)
+async function addQuote(msg)
 {
     men = getMention(msg);
     if(!men) return;
