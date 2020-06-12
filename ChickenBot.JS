@@ -686,7 +686,7 @@ function messageReceived(msg)
 	 }
 	 words = msg.content.trim().split(/\s+/).length;
 	 console.log("Words: "+words);
-	 points+= Math.trunc(ppw*words);
+	 points+= Math.trunc(ppw*Math.sqrt(words*2+1));
 	 console.log("User: "+msg.author.id);
 	 console.log("Points: "+points);
 	 console.log(msg.content);
