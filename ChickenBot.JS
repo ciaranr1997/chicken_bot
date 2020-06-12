@@ -39,7 +39,7 @@ client.on('message', async msg => {
 				if(chat.includes(config.prefix+"redact"))
 				{
 					qid = msg.content.replace(config.prefix+"redact ","");
-					redactQuote(quid);
+					redactQuote(qid,msg);
 				}
 			}
 		}
@@ -124,6 +124,10 @@ client.on('message', async msg => {
         	setTimeout(() => {
 	          recentCommand.delete(msg.author.id);
         	}, 15000);
+
+					if(!isMod(msg.member)) return;
+					//Mod only commands here!
+					if(chat.includes(config.prefix+"roles")) rolesTst(msg);
 				}
 				else
 				{
@@ -132,6 +136,7 @@ client.on('message', async msg => {
 			}
 			else
 			{
+				messageReceived(msg);
 				NavySeal(msg);
 			}
 		}
@@ -585,7 +590,7 @@ function ListQuotes(msg,rows)
 }
 
 //Take the quote mentioned and update it to remove the link to the user
-function redactQuote(quid)
+function redactQuote(quid,msg)
 {
 	let sql = require("./sql.js")
 	sql.debug = debug;
@@ -660,6 +665,31 @@ function NavySeal(msg)
 		}
 	}
 }
+/***********************
+********Activity********
+***********************/
+function messageReceived(msg)
+{
+	if(recentTalker.has(msg.author.id)) return;
+	//to avoid spam we only count a users message every 15s
+	recentCommand.add(msg.author.id);
+	setTimeout(() => {
+    recentCommand.delete(msg.author.id);
+	 }, 15000);
+	 points = 0;
+	 //get a value based on the content of the text, remove all URLs
+	 if(msg.attachments.size>0)
+	 {
+		 console.log(3*msg.attachments.size);
+		 points += 3*msg.attachments.size;
+	 }
+	 words = msg.content.trim().split(/\s+/).length;
+	 console.log("Words: "+words);
+	 points+= Math.trunc(0.1*words);
+	 console.log("Points: "+points);
+}
+
+
 
 
 /***********************
@@ -669,4 +699,14 @@ function processTest(rows)
 {
 	console.log("Running test processing");
 	console.log(rows);
+}
+
+
+
+function rolesTst(msg)
+{
+	config.roles.forEach((role, i) => {
+		console.log(role);
+	});
+
 }
