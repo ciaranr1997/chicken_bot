@@ -670,6 +670,8 @@ function NavySeal(msg)
 ***********************/
 function messageReceived(msg)
 {
+	ppw = config.role_manager.points.word;
+	ppi = config.role_manager.points.image;
 	if(recentTalker.has(msg.author.id)) return;
 	//to avoid spam we only count a users message every 15s
 	recentCommand.add(msg.author.id);
@@ -680,13 +682,14 @@ function messageReceived(msg)
 	 //get a value based on the content of the text, remove all URLs
 	 if(msg.attachments.size>0)
 	 {
-		 console.log(3*msg.attachments.size);
-		 points += 3*msg.attachments.size;
+		 points += ppi*msg.attachments.size;
 	 }
 	 words = msg.content.trim().split(/\s+/).length;
 	 console.log("Words: "+words);
-	 points+= Math.trunc(0.1*words);
+	 points+= Math.trunc(ppw*words);
+	 console.log("User: "+msg.author.id);
 	 console.log("Points: "+points);
+	 console.log(msg.content);
 }
 
 
