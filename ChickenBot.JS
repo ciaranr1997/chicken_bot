@@ -682,9 +682,9 @@ function messageReceived(msg)
 	ppi = config.role_manager.points.image;
 	if(recentTalker.has(msg.author.id)) return;
 	//to avoid spam we only count a users message every 15s
-	recentCommand.add(msg.author.id);
+	recentTalker.add(msg.author.id);
 	setTimeout(() => {
-	recentCommand.delete(msg.author.id);
+	recentTalker.delete(msg.author.id);
 	}, 15000);
 	points = 0;
 	//get a value based on the content of the text, remove all URLs
