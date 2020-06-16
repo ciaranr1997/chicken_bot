@@ -67,7 +67,15 @@ client.on('message', async msg => {
 					{
 						msg.reply("Ciaran hasn't programmed this in yet. Tell him to get a move on!");
 					}
-
+					if(chat==config.prefix+"frank")
+					{
+						let sql = require("./sql.js")
+						sql.debug = debug;
+						sql.connect();
+						sql.query("select count(*) as rank from fowl_levels where points >= (select points from fowl_levels where user_id=\""+msg.author.id+"\")",
+						makeRank,msg);
+						sql.close();
+					}
 					//rquote command
 					if(chat.includes(config.prefix+"rquote"))
 					{
@@ -676,23 +684,39 @@ function messageReceived(msg)
 	//to avoid spam we only count a users message every 15s
 	recentCommand.add(msg.author.id);
 	setTimeout(() => {
-    recentCommand.delete(msg.author.id);
-	 }, 15000);
-	 points = 0;
-	 //get a value based on the content of the text, remove all URLs
-	 if(msg.attachments.size>0)
-	 {
-		 points += ppi*msg.attachments.size;
-	 }
-	 words = msg.content.trim().split(/\s+/).length;
-	 console.log("Words: "+words);
-	 points+= Math.trunc(ppw*Math.sqrt(words*2+1));
-	 console.log("User: "+msg.author.id);
-	 console.log("Points: "+points);
-	 console.log(msg.content);
+	recentCommand.delete(msg.author.id);
+	}, 15000);
+	points = 0;
+	//get a value based on the content of the text, remove all URLs
+	if(msg.attachments.size>0)
+	{
+	 points += ppi*msg.attachments.size;
+		}
+	words = msg.content.trim().split(/\s+/).length;
+	console.log("Words: "+words);
+	points+= Math.trunc(ppw*Math.sqrt(words*2+1));
+	console.log("User: "+msg.author.id);
+	console.log("Points: "+points);
+	let sql = require("./sql.js");
+
+	sql.debug = debug;
+	sql.connect();
+	sql.run(
+		"INSERT OR REPLACE INTO  fowl_levels (user_id,points) VALUES(\""+msg.author.id+"\","+points+") ON CONFLICT(user_id) DO UPDATE set points=points+"+points
+	);
+	sql.run("INSERT INTO fowl_points (user_id,points,timestamp) VALUES(\""+msg.author.id+"\","+points+",\""+msg.createdTimestamp+"\")");
+	sql.close();
 }
 
-
+function makeRank(msg,rows)
+{
+	if(rows[0].rank==0)
+	{
+		msg.reply("You don't appear to be ranked. Try sending some messages?");
+		return;
+	}
+	msg.reply("You are rank "+rows[0].rank);
+}
 
 
 /***********************

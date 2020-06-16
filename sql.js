@@ -22,7 +22,7 @@ module.exports = {
 		  }
 		  console.log('Closed the database connection.');
 		});
-		
+
 	},
 	query:function(queryString, callback,msg)
 	{
@@ -39,7 +39,8 @@ module.exports = {
         this.db.run(sql, params, function(err){
             if(err)
             {
-              console.log(err);  
+              console.log(err);
+							console.log(sql);
             }
         });
     }
