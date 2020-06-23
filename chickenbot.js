@@ -358,7 +358,7 @@ function returnMovies(data,msg)
 		{
 			//ask for start time
 			let movieRequest =  require("./moviedb.js");
-			schedule(movies[0],msg,getTrailer);
+			movieRequest.getTrailer(movies[0],msg,getTrailer);
 		}
 		else
 		{
@@ -407,18 +407,21 @@ function getTrailer(movieparams,msg,data)
 	console.log(videos);
 	if(videos.length==0)
 	{
-		return;
-	}
-	trailer = "";
-	for(i=0;i<videos.length;i++)
+
+	} else
 	{
-		if(videos[i].type=="Trailer"&&videos[i].site=="YouTube")
+		trailer = "";
+		for(i=0;i<videos.length;i++)
 		{
-			trailer = "https://www.youtube.com/watch?v="+videos[i].key
-			break;
+			if(videos[i].type=="Trailer"&&videos[i].site=="YouTube")
+			{
+				trailer = "https://www.youtube.com/watch?v="+videos[i].key
+				break;
+			}
 		}
+		movieparams.trailer = trailer;
 	}
-	movieparams.trailer = trailer;
+
 	schedule(movieparams,msg);
 }
 
