@@ -274,6 +274,7 @@ client.on('ready', () => {
 	var d = new Date();
 	var n = d.getMinutes();
 	offset = (60-n)*60000;
+	HourlyCheck("nosub");
 	setTimeout(HourlyCheck,offset);
 });
 
@@ -449,12 +450,20 @@ function getMention(message)
 
 
 //the hourly checks to be run
-function HourlyCheck()
+function HourlyCheck(p1)
 {
+	h = new Date().getHours()+":00";
+	if(config.role_manager.update_times.includes(h))
+	{
+		console.log("Is update hour :)");
+		let sql = require("./sql.js")
+		sql.debug = debug;
+		sql.connect();
+	}
+	//renew subscription
 	/*let sql = require("./sql.js")
 	sql.debug = debug;
 	sql.connect();
-
 
 
 	now = Date.now()/1000;
@@ -467,7 +476,10 @@ function HourlyCheck()
 	offset = 60*60000;
 	debug.send("Running hourly tasks in "+offset);
 	sql.close();
-	setTimeout(HourlyCheck,offset);*/
+	if(p1!="nosub")
+	{
+		setTimeout(HourlyCheck,offset);
+	}*/
 }
 
 function movieSoon(rows)
@@ -478,8 +490,24 @@ function movieSoon(rows)
 	}
 }
 
+async function updateRoles(rows)
+{
 
+}
 
+async function userById(uid,msg)
+{
+	if(!msg.guild.members.cache.get(uid))
+	{
+		user = await client.users.fetch(uid);
+		user = user.username;
+	} else
+	{
+		user = msg.guild.members.cache.get(uid).displayName + " ("+msg.guild.members.cache.get(uid).user.tag+")";
+	}
+	user = "unkown";
+	return user;
+}
 
 /***********************
 *********PERMS**********
@@ -619,13 +647,9 @@ async function sayQuote(msg,rows)
 	{
 		user = "_redacted_";
 	}
-	else if(!msg.guild.members.cache.get(rows[0].user_id))
+	else
 	{
-		user = await client.users.fetch(rows[0].user_id);
-		user = user.username;
-	} else
-	{
-		user = msg.guild.members.cache.get(rows[0].user_id).displayName + " ("+msg.guild.members.cache.get(rows[0].user_id).user.tag+")";
+		user = await userById(rows[0].user_id,msg);
 	}
 	msg.channel.send("> "+rows[0].quote+"\n - "+user+"");
 }
@@ -654,9 +678,9 @@ function NavySeal(msg)
 	}
 	if(appropriate)
 	{
-		rand = Math.floor(Math.random() * 10000) + 1;
+		rand = Math.floor(Math.random() * 1000) + 1;
 		console.log(rand);
-		if(rand==1)
+		if(rand==69)
 		{
 			copypasta="What the fuck did you just fucking say about me, you little bitch?"
 			copypasta+=" I'll have you know I graduated top of my class in the Navy Seals, and I've been involved in numerous secret raids on Al-Quaeda, and I have over 300 confirmed kills."
@@ -705,9 +729,9 @@ function messageReceived(msg)
 	sql.debug = debug;
 	sql.connect();
 	sql.run(
-		"INSERT OR REPLACE INTO  fowl_levels (user_id,points) VALUES(\""+msg.author.id+"\","+points+") ON CONFLICT(user_id) DO UPDATE set points=points+"+points
+		"INSERT OR REPLACE INTO  fowl_levels (user_id,points) VALUES(\""+msg.author.id+"\","+points+") ON CONFLICT(user_id) DO UPDATE set points=points+"+points+";"
+		+"INSERT INTO fowl_points (user_id,points,timestamp) VALUES(\""+msg.author.id+"\","+points+",\""+msg.createdTimestamp+"\")"
 	);
-	sql.run("INSERT INTO fowl_points (user_id,points,timestamp) VALUES(\""+msg.author.id+"\","+points+",\""+msg.createdTimestamp+"\")");
 	sql.close();
 }
 

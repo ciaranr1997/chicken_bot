@@ -34,14 +34,38 @@ module.exports = {
            callback(msg,rows);
         });
     },
-    run:function(sql,params)
+    run:async function(sql,params)
     {
         this.db.run(sql, params, function(err){
             if(err)
             {
-              console.log(err);
-							console.log(sql);
+							console.log("run "+sql);
+							if(err.message.includes("SQLITE_BUSY"))
+							{
+								setTimeout(function()
+								{
+									sqlh.retry(sql);
+								}
+								,500)
+							} else
+							{
+            		console.log(err);
+								console.log(sql);
+							}
             }
         });
-    }
+    },
+		retry:async function(sql)
+		{
+			console.log("Retry");
+			console.log(sql);
+			this.db.run(sql, [], function(err){
+				sqlh = this;
+					if(err)
+					{
+						console.log(err);
+
+					}
+			});
+		}
 }
