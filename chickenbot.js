@@ -452,13 +452,19 @@ function getMention(message)
 //the hourly checks to be run
 function HourlyCheck(p1)
 {
-	h = new Date().getHours()+":00";
+	/*
+	h = new Date().getHours();
+	(h<10)? h="0"+h+":00" : h=h+"00";
+	yest = Date.now()-86400000 ;
+	console.log(h);
 	if(config.role_manager.update_times.includes(h))
 	{
 		console.log("Is update hour :)");
 		let sql = require("./sql.js")
 		sql.debug = debug;
 		sql.connect();
+		sql.query("select user_id, SUM(points) as pointies from fowl_points group by user_id order by pointies desc",updateRoles,"");
+		sql.close();
 	}
 	//renew subscription
 	/*let sql = require("./sql.js")
@@ -484,28 +490,41 @@ function HourlyCheck(p1)
 
 function movieSoon(rows)
 {
-	for(i=0; i < rows.length; i++)
-	{
-
-	}
 }
 
-async function updateRoles(rows)
+async function updateRoles(msg,rows)
 {
-
+	//console.log(rows);
+	output="";
+		for(i=0; i < rows.length; i++)
+		{
+			user = await userById(rows[i].user_id);
+			output+=user+": "+rows[i].pointies+"\n";
+		}
+		console.log(output);
+		debug.send(output);
 }
 
 async function userById(uid,msg)
 {
-	if(!msg.guild.members.cache.get(uid))
+	if(msg!=null)
+	{
+		guild = msg.guild;
+	}
+	else
+	{
+		guild = client.guilds.cache.get(config.server_id);
+	}
+	user = "unknown";
+	usertemp = await guild.members.cache.get(uid);
+	if(!usertemp)
 	{
 		user = await client.users.fetch(uid);
 		user = user.username;
 	} else
 	{
-		user = msg.guild.members.cache.get(uid).displayName + " ("+msg.guild.members.cache.get(uid).user.tag+")";
+		user = usertemp.displayName + " ("+usertemp.user.tag+")";
 	}
-	user = "unkown";
 	return user;
 }
 
