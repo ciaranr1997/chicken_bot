@@ -1,0 +1,57 @@
+.header
+{
+	width:100%;
+	font-size: 30px;
+	font-weight: bolder;
+	color:white;
+	margin-top:20px;
+	margin-bottom:20px;
+}
+.tile.easy
+{
+	background-color: #258d2e;
+}
+.tile.medium
+{
+	background-color: #e7c037;
+}
+.tile.hard
+{
+	background-color: #a82e2e;
+}
+.checked
+{
+	background-image: url('/static/images/cross.png');
+}
+.board
+{
+	width:488px;
+	background-color: white;
+	height:488px;
+	padding:0;
+	margin:0;
+	display:inline-table;
+	border-collapse: collapse;
+}
+.tile
+{
+	display: inline-block;
+	width:120px;
+	background-color: grey;
+	height:120px;
+	padding:0;
+	margin:0;
+	border:1px solid black;
+	word-wrap:break-word;
+	overflow-y: hidden;
+}
+.bingo-text
+{
+	display: table-cell;
+  vertical-align: middle;
+	width:120px;
+	max-width: 120px;
+	color:black;
+	height:120px;
+	text-align: center;
+}

@@ -1,0 +1,43 @@
+body
+{
+	background-color: #18191c;
+	color:#f5cc09;
+	font-weight: 900;
+	text-align: center;
+	color:white;
+}
+
+.login-button
+{
+	background: #7289da;
+	color: #fff;
+	border:none;
+	border: none;
+  font-family: Whitney,Helvetica Neue,Helvetica,Arial,sans-serif;
+  font-weight: 400;
+  line-height: 18px;
+	font-size: 15px;
+  border-radius: 3px;
+	padding: 10px 16px;
+	margin-top:5px;
+
+}
+
+.login-button:hover
+{
+	background: #4e5d94;
+}
+.login-box
+{
+	height:30%;
+	background-color: #18191c;
+	width:30%;
+	margin:auto;
+	margin-top:20%;
+	border-radius: 20px;
+	padding:5px;
+}
+.login-inner
+{
+	padding:20px;
+}
