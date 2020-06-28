@@ -72,7 +72,7 @@ client.on('message', async msg => {
 						let sql = require("./sql.js")
 						sql.debug = debug;
 						sql.connect();
-						sql.query("select count(*) as rank from fowl_levels where points >= (select points from fowl_levels where user_id=\""+msg.author.id+"\")",
+						sql.query("select * from fowl_levels order by points desc",
 						makeRank,msg);
 						sql.close();
 					}
@@ -82,7 +82,7 @@ client.on('message', async msg => {
 						let sql = require("./sql.js")
 						sql.debug = debug;
 						sql.connect();
-						sql.query("SELECT * FROM fowl_quotes ORDER BY RANDOM() LIMIT 1",sayQuote,msg);
+						sql.query("SELECT * FROM fowl_quotes ORDER BY RAND() LIMIT 1",sayQuote,msg);
 						sql.close();
 					}
 
@@ -748,20 +748,32 @@ function messageReceived(msg)
 	sql.debug = debug;
 	sql.connect();
 	sql.run(
-		"INSERT OR REPLACE INTO  fowl_levels (user_id,points) VALUES(\""+msg.author.id+"\","+points+") ON CONFLICT(user_id) DO UPDATE set points=points+"+points+";"
-		+"INSERT INTO fowl_points (user_id,points,timestamp) VALUES(\""+msg.author.id+"\","+points+",\""+msg.createdTimestamp+"\")"
+		"INSERT INTO  fowl_levels (user_id,points) VALUES(\""+msg.author.id+"\","+points+") ON DUPLICATE KEY UPDATE points=points+"+points+";"
+	);
+	sql.run(
+		"INSERT INTO fowl_points (user_id,points,timestamp) VALUES(\""+msg.author.id+"\","+points+",\""+msg.createdTimestamp+"\")"
 	);
 	sql.close();
 }
 
 function makeRank(msg,rows)
 {
-	if(rows[0].rank==0)
+	rank = 0;
+	console.log(rows);
+	for(i=0;i<rows.length;i++)
+	{
+		if(rows[i].user_id==msg.author.id)
+		{
+			rank = i+1;
+			break;
+		}
+	}
+	if(rank==0)
 	{
 		msg.reply("You don't appear to be ranked. Try sending some messages?");
 		return;
 	}
-	msg.reply("You are rank "+rows[0].rank);
+	msg.reply("You are rank "+rank);
 }
 
 
