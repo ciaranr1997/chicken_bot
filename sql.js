@@ -16,7 +16,6 @@ module.exports = {
 		this.db.end((err) => {
 		  if (err) {
 			console.error(err.message);
-			this.debug.send("Close err: "+err.message);
 		  }
 		});
 
@@ -43,5 +42,25 @@ module.exports = {
 
             }
         });
-    }
+    },
+		syncQuery:function(queryString)
+		{
+			db = this.db
+				return new Promise(function(resolve, reject){
+        	db.query(queryString, [], (err, rows) => {
+	          if (err) {
+							console.log("ERROR");
+	            console.log(err);
+							reject(new Error(err));
+	          }
+							rows = JSON.stringify(rows);
+							rows = JSON.parse(rows);
+						if(rows === undefined){
+                reject(new Error("Error rows is undefined"));
+            }else{
+                resolve(rows);
+            }
+        	});
+				});
+	    }
 }

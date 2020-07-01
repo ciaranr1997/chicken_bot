@@ -773,7 +773,10 @@ function makeRank(msg,rows)
 		msg.reply("You don't appear to be ranked. Try sending some messages?");
 		return;
 	}
-	msg.reply("You are rank "+rank);
+	msg.reply("You are rank "+rank,
+	{
+		files: ["http://chickenbot.xyz/scorecard/x"+msg.author.id+".png"]
+	});
 }
 
 

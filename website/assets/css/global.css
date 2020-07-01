@@ -28,3 +28,17 @@ nav
 	float:right;
 	margin-right:30px;
 }
+
+.error-page
+{
+		color:red;
+		margin-top:25%;
+}
+.error-page a
+{
+	color:red;
+}
+.error-page:hover a
+{
+	color:purple;
+}

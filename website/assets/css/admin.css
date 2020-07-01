@@ -1,0 +1,45 @@
+div.panel-container
+{
+	margin-top:50px;
+	display:inline-block;
+	width: 80%;
+	height: auto;
+	display:inline-table;
+	padding-bottom: 50px;
+}
+div.panel
+{
+	display: inline-block;
+	width:300px;
+	border:1px solid darkgrey;
+	height:300px;
+	margin-left:50px;
+	margin-top:50px;
+	border-radius: 30px;
+	box-shadow: 3px 5px #777;
+	background-color: #18191c;
+}
+div.panel > h2.header, div.panel > h2.header > a
+{
+	font-size:20px;
+	font-weight: 600;
+	color:white;
+	margin-top:20px;
+	text-decoration: underline;
+}
+
+div.panel > span.panel-description
+{
+	display:inline-block;
+	color:white;
+	font-size: 18px;
+	height: auto;
+	width:90%;
+	word-wrap: break-word;
+	margin-top:20px;
+}
+div.panel:hover
+{
+
+	box-shadow: 0px 0px #777;
+}

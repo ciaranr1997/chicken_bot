@@ -11,15 +11,35 @@ const ctx = canvas.getContext('2d')
 client.login(config.token);
 
 router.get('/[x0-9]*', async function(req,res){
+	user = req.params[0].replace(".png","");
+	//get rank
+	let sql = require("../../sql.js");
+	sql.connect();
+	rows = await sql.syncQuery("select * from fowl_levels order by points desc");
+	sql.close();
+	rank = 0;
+	for(i=0;i<rows.length;i++)
+	{
+		if(rows[i].user_id==user)
+		{
+			rank = i+1;
+			points = rows[i].points;
+			break;
+		}
+	}
+	if(rank==0)
+	{
+
+		return;
+	}
+
 	ctx.fillStyle = "#000";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-	user = req.params[0].replace(".png","");
-	console.log(user);
 	myUser = await client.users.fetch(user);
-	console.log(myUser);
 	ctx.font = '20px Impact'
 	ctx.fillStyle = "white";
-	ctx.fillText(myUser.username+"#"+myUser.discriminator, 100, 30)
+	ctx.fillText(myUser.username+"#"+myUser.discriminator, 100, 50)
+	ctx.fillText("Rank #"+rank+" ("+points+" xp)",100,70);
 	// Draw line under text
 	res.writeHead(200, { 'Content-Type': 'image/png' });
 
@@ -33,6 +53,7 @@ router.get('/[x0-9]*', async function(req,res){
 	ctx.stroke();
 
 	res.end(canvas.toBuffer());
+
 });
 
 module.exports = router;

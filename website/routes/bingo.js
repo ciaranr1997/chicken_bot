@@ -7,20 +7,76 @@ router.get('/',(req,res)=>{
 	if(!req.user)
 	{
 		res.redirect('/');
+		return;
 	}
 	nav = fs.readFileSync("pageparts/nav.html").toString();
 	header = fs.readFileSync("pageparts/header.html").toString();
-	fs.readFile('html/bingo.html', (e, data) => {
+	fs.readFile('html/bingo.html', async (e, data) => {
 		if (e) throw e;
+		let sql = require("../../sql.js");
+		sql.connect();
+		userCard = await sql.syncQuery("select * from bingo_cards where is_active=1 AND user_id="+req.user.id);
 
-		res.writeHead(200, {'Content-Type': 'text/html'});
+		if(userCard.length==0)
+		{
+			ezrows = await sql.syncQuery("select * from bingo_options where difficulty=1 ORDER BY RAND() LIMIT 8");
+			medrows = await sql.syncQuery("select * from bingo_options where difficulty=2 ORDER BY RAND() LIMIT 6");
+			hardrows = await sql.syncQuery("select * from bingo_options where difficulty=3 ORDER BY RAND() LIMIT 2");
+			all = ezrows.concat(medrows);
+			all = all.concat(hardrows);
+			shuffle(all);
+			cardData = JSON.stringify(all);
+			sql.run("INSERT INTO bingo_cards (user_id,card_data,is_active) VALUES(?,?,1)",[req.user.id,cardData]);
+			sql.close();
+		}
+		else
+		{
+			all = JSON.parse(userCard[0].card_data);
+		}
+		cards = "";
+		for(i=0; i<all.length;i++)
+		{
+			//check if the square has been checked off
+			id= all[i].id;
+			dif = "";
+			if(all[i].difficulty==1) dif = "easy"
+			if(all[i].difficulty==2) dif = "medium"
+			if(all[i].difficulty==3) dif = "hard"
+			cards+='<div class="tile  '+dif+'" id="card-'+id+'">';
+			cards+='<span class="bingo-text">';
+			cards+=all[i].card_text;
+			cards+='</span>'
+			cards+="</div>"
+
+		}
 		html = data.toString();
 		html = html.replace("${site.header}",header);
 		html = html.replace("${site.nav}",nav);
 		html = html.replace("${user.image}",req.user.image);
+		html = html.replace("${bingo.cards}",cards);
 
+		res.writeHead(200, {'Content-Type': 'text/html'});
 		res.end(html);
 	});
 });
 
+
 module.exports = router;
+function shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
