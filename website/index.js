@@ -7,6 +7,7 @@ const passport = require("passport");
 const authRoute = require('./routes/auth');
 const bingoRoute = require('./routes/bingo');
 const scoreRoute = require('./routes/scorecard');
+const quoteRoute = require('./routes/quotes');
 const adminRoute = require('./routes/admin');
 const DiscordStrategy = require('./strategies/discordstrategy.js');
 const config = require('../config.json');
@@ -110,6 +111,7 @@ app.get('/sql',async (req, res) => {
 //Non important routes
 app.use('/bingo',bingoRoute);
 
+app.use('/quotes',quoteRoute);
 
 
 
