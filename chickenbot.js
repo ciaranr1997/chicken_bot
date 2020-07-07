@@ -103,6 +103,11 @@ client.on('message', async msg => {
 						hug(msg);
 					}
 
+										//hug command
+					if(chat.includes(config.prefix+"cluck"))
+					{
+						cluck(msg);
+					}
 					//schedule a new movie night
 					if(chat.includes(config.prefix+"schedule"))
 					{
@@ -269,7 +274,8 @@ client.on('ready', () => {
 	//const guild = client.guilds.get(config.server_id);
 	debug = client.channels.cache.get(config.debug_channel);
 	movieAnnounce = client.channels.cache.get(config.movie_announce);
-	client.user.setPresence({activity:{ name: 'Watching over the coop. '+config.prefix+'fhelp' }, status: 'available'});
+	//client.user.setPresence({activity:{ name: 'Watching over the coop. '+config.prefix+'fhelp' }, status: 'available'});
+	client.user.setActivity('Watching over the coop. '+config.prefix+'fhelp');
 	debug.send("I'm awake!");
 	var d = new Date();
 	var n = d.getMinutes();
@@ -684,7 +690,16 @@ function hug(message)
 	message.delete();
 
 }
+function cluck(message)
+{
+	mention = getMention(message);
+	console.log(message.channel.id)
+	if(message.channel.id!="729842480199106591") return;
+	if (!mention) return;
+	message.channel.send("_Every chicken in the coop turns and stares at <@"+mention+"> as the Rooster himself waddles over Cluck cluck gets even closer Buk?_\n\n(The chickens are confused as this channel is for stupid chicken role play only for a joke and not general human speak)");
+	message.delete();
 
+}
 function NavySeal(msg)
 {
 	appropriate = true;

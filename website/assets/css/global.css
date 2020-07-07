@@ -4,6 +4,7 @@ body
 	color:#f5cc09;
 	font-weight: 900;
 	text-align: center;
+	font-family: "Roboto";
 }
 nav
 {
@@ -41,4 +42,36 @@ nav
 .error-page:hover a
 {
 	color:purple;
+}
+.nav-left
+{
+	float:left;
+	height:50px;
+}
+.nav-left > *
+{
+	display:inline-block;
+}
+.nav-left > .nav-item > a > img
+{
+	width: 30px;
+	height:30px;
+	border-right: 1px solid grey;
+	padding-right: 5px;
+}
+.nav-left > .nav-item > a
+{
+	color:white;
+	text-decoration: none;
+}
+.nav-item
+{
+	height:30px;
+	margin-top:10px;
+	font-size: 30px;
+	margin-left:5px;
+}
+.nav-left > .nav-item > a:hover
+{
+	color:#ccc;
 }
