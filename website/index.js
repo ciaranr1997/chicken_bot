@@ -25,6 +25,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //IMPORTANT PAGES - these can ignore the auth redirect
+
+app.use('/scorecard',scoreRoute);
 app.use('/static', express.static('assets'))
 app.use('/auth',authRoute);
 app.use('/admin',adminRoute);
@@ -107,7 +109,6 @@ app.get('/sql',async (req, res) => {
 
 //Non important routes
 app.use('/bingo',bingoRoute);
-app.use('/scorecard',scoreRoute);
 
 
 
