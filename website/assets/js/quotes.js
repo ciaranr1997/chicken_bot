@@ -10,7 +10,7 @@ $(".redactbtn").click(function(e)
 			}
 			else if (data.error)
 			{
-					alert("There has been an error doing this. Please refresh the page and try again :()");
+					alert("There has been an error doing this. Please refresh the page and try again :(\n\n"+data.error);
 			}
 	 });
 });

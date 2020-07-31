@@ -32,7 +32,7 @@ app.use('/scorecard',scoreRoute);
 app.use('/static', express.static('assets'))
 app.use('/auth',authRoute);
 app.use('/admin',adminRoute);
-
+app.use('/requests',requestRoute);
 
 app.get('/error', (req, res) => {
 	fs.readFile('html/error.html', (e, data) => {
@@ -115,7 +115,7 @@ app.use('/bingo',bingoRoute);
 
 app.use('/quotes',quoteRoute);
 
-app.use('/requests',requestRoute);
+
 
 
 const server = app.listen(8001, () => {

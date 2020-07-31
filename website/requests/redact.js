@@ -12,6 +12,11 @@ redact =
 	},
 	run:async function()
 	{
+		if(!this.req.user)
+		{
+			this.error("You are not currently logged in");
+			return;
+		}
 		quoteId = request.params[1];
 		let sql = require("../../sql.js");
 		sql.connect();
@@ -19,9 +24,10 @@ redact =
 
 		result = await sql.syncQuery(query).catch(function(err)
 		{
-			this.error("query failed :(");
+				this.error("query failed :(");
 				this.res.writeHead(200, {'Content-Type': 'text/json'});
-				this.res.end('{"error":"request was a failure"}');
+				this.res.end('{"error":"request was a failure updating this quote"}');
+				return;
 
 		}).finally(()=>
 		{
@@ -39,7 +45,8 @@ redact =
 	},
 	error:function(err)
 	{
-
+			this.res.writeHead(200, {'Content-Type': 'text/json'});
+			this.res.end('{"error":"'+err+'"}');
 	}
 };
 
