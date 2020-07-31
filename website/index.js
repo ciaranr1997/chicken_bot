@@ -9,6 +9,7 @@ const bingoRoute = require('./routes/bingo');
 const scoreRoute = require('./routes/scorecard');
 const quoteRoute = require('./routes/quotes');
 const adminRoute = require('./routes/admin');
+const requestRoute = require('./requests');
 const DiscordStrategy = require('./strategies/discordstrategy.js');
 const config = require('../config.json');
 
@@ -31,6 +32,7 @@ app.use('/scorecard',scoreRoute);
 app.use('/static', express.static('assets'))
 app.use('/auth',authRoute);
 app.use('/admin',adminRoute);
+
 
 app.get('/error', (req, res) => {
 	fs.readFile('html/error.html', (e, data) => {
@@ -113,7 +115,7 @@ app.use('/bingo',bingoRoute);
 
 app.use('/quotes',quoteRoute);
 
-
+app.use('/requests',requestRoute);
 
 
 const server = app.listen(8001, () => {

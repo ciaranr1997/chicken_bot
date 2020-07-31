@@ -9,16 +9,16 @@ router.get('/',(req,res)=>{
 	fs.readFile('html/quotes.html', async (e, data) => {
 		let sql = require("../../sql.js");
 		sql.connect();
-		quoteList = await sql.syncQuery("select * from fowl_quotes where user_id='189514636318605313'");
+		quoteList = await sql.syncQuery("select * from fowl_quotes where user_id='"+req.user.id+"'");
 		sql.close();
 		output = "";
 		for(i=0;i<quoteList.length;i++)
 		{
-			output+="<li class=\"\">";
+			output+="<li class=\"\" id=\"li-"+quoteList[i].id+"\">";
 			output+="<span class=\"quote\">";
 			output+=quoteList[i].quote;
 			output+="</span>";
-			output+="<button class=\"redactbtn\" id=\"redact-"+quoteList.id+"\">REDACT</button>";
+			output+="<button class=\"redactbtn\" id=\"redact-"+quoteList[i].id+"\">REDACT</button>";
 			output+="</li>"
 		}
 		console.log(quoteList);

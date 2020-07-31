@@ -10,6 +10,9 @@
 	background-color: #28292c;
 	padding-top: 20px;
   padding-bottom: 20px;
+	height: auto;
+	max-height: 80%;
+	overflow-y: scroll;
 }
 .quotelist li
 {
@@ -33,7 +36,11 @@
 .redactbtn
 {
 	color:white;
-	background-color: #fe6464;
+	background-color: red;
 	border: 1px solid #ff4545;
 	margin-left: 20px; border-radius: 20px;
+}
+.redactbtn:hover
+{
+	background-color: #fe6464;
 }
