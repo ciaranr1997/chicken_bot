@@ -103,10 +103,16 @@ client.on('message', async msg => {
 						hug(msg);
 					}
 
-										//hug command
+					//cluck command
 					if(chat.includes(config.prefix+"cluck"))
 					{
 						cluck(msg);
+					}
+
+					//website command
+					if(chat.includes(config.prefix+"website"))
+					{
+						msg.reply("The website for chickenbot can be found at http://chickenbot.xyz but shhh, its a secret ;)");
 					}
 					//schedule a new movie night
 					if(chat.includes(config.prefix+"schedule"))
