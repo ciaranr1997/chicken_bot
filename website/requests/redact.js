@@ -18,6 +18,11 @@ redact =
 			return;
 		}
 		quoteId = request.params[1];
+		if(isNaN(quoteId))
+		{
+			this.error("You don't seem to have sent a legit request to redact a quote");
+			return;
+		}
 		let sql = require("../../sql.js");
 		sql.connect();
 		query = "UPDATE fowl_quotes SET user_id=0 WHERE user_id="+this.req.user.id+" AND id='"+quoteId+"'";
