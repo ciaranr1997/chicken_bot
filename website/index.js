@@ -9,6 +9,7 @@ const bingoRoute = require('./routes/bingo');
 const scoreRoute = require('./routes/scorecard');
 const quoteRoute = require('./routes/quotes');
 const adminRoute = require('./routes/admin');
+const leaderRoute = require('./routes/leaderboard');
 const requestRoute = require('./requests');
 const DiscordStrategy = require('./strategies/discordstrategy.js');
 const config = require('../config.json');
@@ -33,6 +34,7 @@ app.use('/static', express.static('assets'))
 app.use('/auth',authRoute);
 app.use('/admin',adminRoute);
 app.use('/requests',requestRoute);
+app.use('/leaderboard',leaderRoute);
 
 app.get('/error', (req, res) => {
 	fs.readFile('html/error.html', (e, data) => {
@@ -66,7 +68,8 @@ app.all("*", (req,res, next) => {
  if(req.user){
   next();
  }else{
-    res.redirect("/login")
+	 	req.session.redirectTo = req.originalUrl;
+    res.redirect("/login");
   }
 })
 

@@ -1,11 +1,19 @@
 <html>
 	<head>
 		${site.header}
-		<link rel="stylesheet" href="static/css/admin.css">
+		<link rel="stylesheet" href="/static/css/admin.css">
+
 		<title>Chicken Bot Admin!</title>
 	</head>
 	<body>
 		${site.nav}
-		
+		<center>
+		<div class="btn-area">
+			<button class="reset" id="reset">Reset All Cards</button>
+			${admin.bingo.toggle}
+		</div>
+		${admin.bingo.cards}
+	</center>
+	<script src="/static/js/admin.js"></script>
 	</body>
 </html>

@@ -15,7 +15,8 @@ router.get('/failed', (req,res)=>{
 });
 router.get('/success', (req,res)=>{
 	//res.send("happy face :)<br/><img src="+req.user.image+">");
-	res.redirect('/');
+	console.log(req.session.redirectTo);
+	res.redirect(req.session.redirectTo);
 	//console.log(req);
 });
 module.exports = router;

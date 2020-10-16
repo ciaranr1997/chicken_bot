@@ -12,49 +12,60 @@ router.get('/',(req,res)=>{
 	nav = fs.readFileSync("pageparts/nav.html").toString();
 	header = fs.readFileSync("pageparts/header.html").toString();
 	fs.readFile('html/bingo.html', async (e, data) => {
-		if (e) throw e;
+
+		html = data.toString();
 		let sql = require("../../sql.js");
 		sql.connect();
-		userCard = await sql.syncQuery("select * from bingo_cards where is_active=1 AND user_id="+req.user.id);
-
-		if(userCard.length==0)
+		is_active = await sql.syncQuery("select setting_value from bingo_settings where setting=\"is_active\"");
+		is_active = is_active[0].setting_value;
+		if(is_active==1)
 		{
-			ezrows = await sql.syncQuery("select * from bingo_options where difficulty=1 ORDER BY RAND() LIMIT 8");
-			medrows = await sql.syncQuery("select * from bingo_options where difficulty=2 ORDER BY RAND() LIMIT 6");
-			hardrows = await sql.syncQuery("select * from bingo_options where difficulty=3 ORDER BY RAND() LIMIT 2");
-			all = ezrows.concat(medrows);
-			all = all.concat(hardrows);
-			shuffle(all);
-			cardData = JSON.stringify(all);
-			sql.run("INSERT INTO bingo_cards (user_id,card_data,is_active) VALUES(?,?,1)",[req.user.id,cardData]);
-			sql.close();
+
+			if (e) throw e;
+			userCard = await sql.syncQuery("select * from bingo_cards where is_active=1 AND user_id="+req.user.id);
+
+			if(userCard.length==0)
+			{
+				ezrows = await sql.syncQuery("select * from bingo_options where difficulty=1 and is_active=1 ORDER BY RAND() LIMIT 8");
+				medrows = await sql.syncQuery("select * from bingo_options where difficulty=2 and is_active=1 ORDER BY RAND() LIMIT 6");
+				hardrows = await sql.syncQuery("select * from bingo_options where difficulty=3 and is_active=1 ORDER BY RAND() LIMIT 2");
+				all = ezrows.concat(medrows);
+				all = all.concat(hardrows);
+				shuffle(all);
+				cardData = JSON.stringify(all);
+				sql.run("INSERT INTO bingo_cards (user_id,card_data,is_active) VALUES(?,?,1)",[req.user.id,cardData]);
+				sql.close();
+			}
+			else
+			{
+				all = JSON.parse(userCard[0].card_data);
+			}
+			cards = "";
+			for(i=0; i<all.length;i++)
+			{
+				//check if the square has been checked off
+				id= all[i].id;
+				dif = "";
+				if(all[i].difficulty==1) dif = "easy"
+				if(all[i].difficulty==2) dif = "medium"
+				if(all[i].difficulty==3) dif = "hard"
+				cards+='<div class="tile  '+dif+'" id="card-'+id+'">';
+				cards+='<span class="bingo-text">';
+				cards+=all[i].card_text;
+				cards+='</span>'
+				cards+="</div>"
+
+			}
+			html = html.replace("${bingo.cards}",cards);
 		}
 		else
 		{
-			all = JSON.parse(userCard[0].card_data);
+			html = html.replace("${bingo.cards}","<div class=\"bingo-err\">Bingo is currently closed. Please check back another time.</div>");
 		}
-		cards = "";
-		for(i=0; i<all.length;i++)
-		{
-			//check if the square has been checked off
-			id= all[i].id;
-			dif = "";
-			if(all[i].difficulty==1) dif = "easy"
-			if(all[i].difficulty==2) dif = "medium"
-			if(all[i].difficulty==3) dif = "hard"
-			cards+='<div class="tile  '+dif+'" id="card-'+id+'">';
-			cards+='<span class="bingo-text">';
-			cards+=all[i].card_text;
-			cards+='</span>'
-			cards+="</div>"
 
-		}
-		html = data.toString();
 		html = html.replace("${site.header}",header);
 		html = html.replace("${site.nav}",nav);
 		html = html.replace("${user.image}",req.user.image);
-		html = html.replace("${bingo.cards}",cards);
-
 		res.writeHead(200, {'Content-Type': 'text/html'});
 		res.end(html);
 	});

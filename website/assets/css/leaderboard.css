@@ -1,0 +1,32 @@
+.leaderboard
+{
+  background-color: black;
+	width:500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.leaderrow
+{
+ display:float;
+ width:100px;
+ margin-left: auto;
+ margin-right: auto;
+}
+.leaderrow img
+{
+	display: inline-block;
+	float:left;
+	height:50px;
+	border-radius: 50px;
+}
+.leaderrow *
+{
+	display:inline;
+	color: white;
+  background-color: black !important;
+}
+.leaderrow  .leadertext
+{
+	float:right;
+}

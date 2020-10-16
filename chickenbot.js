@@ -157,6 +157,28 @@ client.on('message', async msg => {
 			{
 				messageReceived(msg);
 				NavySeal(msg);
+				if(msg.content.toLowerCase().includes("coopegg"))
+				{
+					let sql = require("./sql.js")
+					now = Date.now();
+					sql.debug = debug;
+					sql.connect();
+					sql.run(
+						"INSERT INTO egg_messages (message_content,user_tag,user_id,timestamp,message_sent,channel_name) VALUES(?,?,?,?,?,?)",
+						[
+							msg.content,
+							msg.author.tag,
+							msg.author.id,
+							now,msg.createdTimestamp,
+							msg.channel.name
+						]
+					);
+					sql.close();
+					user = await client.users.fetch("187262396237217792");
+
+					user.send("Message from: "+msg.author.tag+"\n In: "+msg.channel.name+"\n_____\n"+msg.content);
+
+				}
 			}
 		}
 
@@ -718,7 +740,7 @@ function NavySeal(msg)
 	}
 	if(appropriate)
 	{
-		rand = Math.floor(Math.random() * 1000) + 1;
+		rand = Math.floor(Math.random() * 1000000) + 1;
 		console.log(rand);
 		if(rand==69)
 		{

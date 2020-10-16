@@ -43,3 +43,152 @@ div.panel:hover
 {
 	box-shadow: 3px 5px #777;
 }
+
+/*******************Bingo*******************/
+.btn-area
+{
+	margin-top:20px;
+}
+.open,.reset
+{
+	color:white;
+	background-color: red;
+	border: 1px solid #ff4545;
+	margin-left: 20px;
+	border-radius: 20px;
+	font-size: 30px;
+}
+.open:hover,.reset:hover
+{
+	background-color: #fe6464;
+}
+.closed
+{
+	color:white;
+	background-color: #58b957;
+	border: 1px solid #58b957;
+	margin-left: 20px;
+	border-radius: 20px;
+	font-size: 30px;
+}
+.closed:hover
+{
+	background-color: #5ecc5e;
+}
+.cardArea
+{
+	margin-top:20px;
+	min-width: 80%;
+	width:80%;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom:50px;
+	padding-bottom:20px;
+}
+.cardArea .cards
+{
+	background-color: #18191c;
+	padding-top: 20px;
+  padding-bottom: 20px;
+	height: auto;
+	max-height: 80%;
+	overflow-y: scroll;
+	width:100%;
+	border:1px solid white;
+	border-collapse: collapse;
+}
+.cardArea .cards li
+{
+	background-color: black;
+	border:2px solid #18191c;
+	color:white;
+	margin-top:10px;
+	width:80%;
+	margin-left: auto;
+	margin-right: auto;
+	height:auto;
+	border-radius: 10px;
+	padding:20px;
+}
+.cardArea .cards th
+{
+	border:1px solid white;
+	font-size: 30px;
+}
+.cardArea .cards td
+{
+	border:1px dotted white;
+}
+.cardArea .option
+{
+	font-style: italic;
+	margin-left:20px;
+}
+
+.cardArea .edit, .cardArea .disable
+{
+	color:white;
+	background-color: red;
+	border: 1px solid #ff4545;
+	margin-left: 20px; border-radius: 20px;
+}
+.cardArea .edit:hover, .cardArea .disable:hover
+{
+	background-color: #fe6464;
+}
+.cardArea th
+{
+	font-weight: bolder;
+}
+.cardArea td
+{
+	font-weight: normal;
+	font-style: normal;
+	width:auto;
+	padding-left: 20px;
+	padding-right: 20px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+.cardArea .save, .cardArea .enable
+{
+	color:white;
+	background-color: #58b957;
+	border: 1px solid #58b957;
+	margin-left: 20px; border-radius: 20px;
+	display:none;
+}
+.cardArea .save:hover, .cardArea .enable:hover
+{
+	background-color: #5ecc5e;
+}
+.cardArea .save#save-new
+{
+	display:inline-block;
+}
+.cardArea input.valIn
+{
+	width:100%;
+}
+.cardArea input.difInput
+{
+	width:50px;
+}
+
+.cardArea .enable
+{
+	display:none;
+}
+.cardArea tr.disabled
+{
+	background-color: #2f2c2d;
+	color:#ccc;
+}
+.cardArea tr.disabled .enable
+{
+	display:inline-block;
+}
+.cardArea tr.disabled .disable
+{
+	display:none;
+}
