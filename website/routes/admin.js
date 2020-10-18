@@ -79,7 +79,7 @@ router.get('/bingo',(req,res)=>{
 			optionArea+="<td><span class=\"optionText\">"+option.card_text+"</span><input id=\"val-"+option.id+"\" hidden value=\""+option.card_text+"\" class=\"valIn\"></td>";
 			optionArea+="<td><span class=\"optionDifficulty\">"+option.difficulty+"</span><input type=number hidden id=\"dif-"+option.id+"\" class=\"difInput\" value=\""+option.difficulty+"\"></td>";
 			optionArea+="<td><button class=\"edit\" id=\"edit-"+option.id+"\">Edit</button><button class=\"save\" id=\"save-"+option.id+"\">Save</button>";
-			optionArea+="<button class=\"disable\" id=\"disable-"+option.id+"\">Disable</button><button class=\"enable\" id=\"enable-"+option.id+"\">Enable</button>";
+			optionArea+="<button class=\"disable\" id=\"disable-"+option.id+"\">Disable</button><button class=\"enable\" id=\"enable-"+option.id+"\">Enable</button><input type='checkbox' id=\"check-"+option.id+"\">";
 			optionArea+="</td>";
 			optionArea+="</tr>";
 		});
