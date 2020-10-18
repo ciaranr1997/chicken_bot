@@ -25,7 +25,7 @@ passport.use(new DiscordStrategy({
 	{
 		id: profile.id,
 		username : profile.username,
-		image:"//cdn.discordapp.com/avatars/"+profile.id+"/"+profile.avatar+".png",
+		image:"//cdn.discordapp.com/avatars/"+profile.id+"/"+profile.avatar+"",
 		perms: perms
 	}
   return done(null, user);
