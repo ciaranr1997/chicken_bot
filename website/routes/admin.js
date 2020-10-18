@@ -95,12 +95,62 @@ router.get('/bingo',(req,res)=>{
 
 
 router.get('/bingo/cards',(req,res)=>{
+
+	const config = require("../../config.json");
+	const Discord = require('discord.js');
+	const client = new Discord.Client();
+	client.login(config.token);
+
 	nav = fs.readFileSync("pageparts/nav.html").toString();
 	header = fs.readFileSync("pageparts/header.html").toString();
 	fs.readFile('html/admin/cards.html', async (e, data) => {
-		cardQuery = "SELECT * from bingo_cards WHERE is_active=1 ORDER BY ID DESC"
+		html = data.toString();
+		cardQuery = "SELECT * from bingo_cards WHERE is_active=1 ORDER BY ID ASC"
 		cards="";
-		html = html.replace("${admin.bingo.cards}",cards);
+		let sql = require("../../sql.js");
+		sql.connect();
+		result = await sql.syncQuery(cardQuery);
+		if(result.length>0)
+		{
+
+
+			for(u=0;u<result.length;u++)
+			{
+				card = result[u];
+				card_data = JSON.parse(card.card_data);
+				myUser = await client.users.fetch(card.user_id);
+				console.log(myUser)
+				userName = myUser.username+"#"+myUser.discriminator
+				cards+="<p class=\"user-title\">"+userName+"</p>";
+				cards+="<div class=\"board\">"
+				for(i=0; i<card_data.length;i++)
+				{
+					//check if the square has been checked off
+
+					id= card_data[i].id;
+					dif = "";
+					if(card_data[i].difficulty==1) dif = "easy"
+					if(card_data[i].difficulty==2) dif = "medium"
+					if(card_data[i].difficulty==3) dif = "hard"
+					cards+='<div class="tile  '+dif+'" id="card-'+id+'">';
+					cards+='<span class="bingo-text">';
+					cards+=card_data[i].card_text;
+					cards+='</span>'
+					cards+="</div>"
+
+				}
+				cards+="</div>";
+
+			}
+		}
+		else
+		{
+			cards = "<div class=\"bingo-err\">Nobody has any bingo cards yet</div>";
+		}
+		html = html.replace("${bingo.cards}",cards);
+		html = html.replace("${site.header}",header);
+		html = html.replace("${site.nav}",nav);
+		html = html.replace("${user.image}",req.user.image);
 		res.writeHead(200, {'Content-Type': 'text/html'});
 		res.end(html);
 	});
