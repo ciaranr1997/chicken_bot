@@ -190,3 +190,10 @@ $(".cardArea .difInput").on("input",function()
 		$(this).val(3);
 	}
 });
+
+/**** Cards Page ****/
+/*
+$(".card-28").each(function(i, obj) {
+    $(obj).addClass("checked");
+});
+*/

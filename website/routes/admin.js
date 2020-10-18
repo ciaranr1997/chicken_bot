@@ -100,13 +100,13 @@ router.get('/bingo',(req,res)=>{
 });
 
 
-
+const config = require("../../config.json");
+const Discord = require('discord.js');
+const client = new Discord.Client();
+client.login(config.token);
 router.get('/bingo/cards',(req,res)=>{
 
-	const config = require("../../config.json");
-	const Discord = require('discord.js');
-	const client = new Discord.Client();
-	client.login(config.token);
+
 
 	nav = fs.readFileSync("pageparts/nav.html").toString();
 	header = fs.readFileSync("pageparts/header.html").toString();
@@ -144,7 +144,7 @@ router.get('/bingo/cards',(req,res)=>{
 					{
 						cards+="checked "
 					}
-					cards+= dif+'" id="card-'+id+'">';
+					cards+= dif+' card-'+id+'">';
 					cards+='<span class="bingo-text">';
 					cards+=card_data[i].card_text;
 					cards+='</span>'

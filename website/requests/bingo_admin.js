@@ -144,6 +144,7 @@ admin =
 			}
 
 		}
+		sql.close();
 		this.end();
 
 	},
