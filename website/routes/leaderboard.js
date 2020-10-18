@@ -52,7 +52,6 @@ router.get('/img', async function(req,res){
 });
 
 router.get('/', async function(req,res){
-	console.log("leaderboard");
 	let sql = require("../../sql.js");
 	sql.connect();
 	rows = await sql.syncQuery("select * from fowl_levels order by points desc");
@@ -104,6 +103,5 @@ router.get('/', async function(req,res){
 });
 module.exports = router;
 client.on('ready', () => {
-	console.log(`Logged in as ${client.user.tag}!`);
 	loggedIn = true;
 });

@@ -21,7 +21,6 @@ router.get('/',(req,res)=>{
 			output+="<button class=\"redactbtn\" id=\"redact-"+quoteList[i].id+"\">REDACT</button>";
 			output+="</li>"
 		}
-		console.log(quoteList);
 		html = data.toString();
 		html = html.replace("${site.header}",header);
 		html = html.replace("${site.nav}",nav);

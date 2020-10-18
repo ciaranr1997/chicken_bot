@@ -4,7 +4,6 @@ const fs = require('fs');
 
 
 router.get('/',(req,res)=>{
-	start = Date.now();
 	if(!req.user)
 	{
 		res.redirect('/');
@@ -56,7 +55,7 @@ router.get('/',(req,res)=>{
 				if(all[i].difficulty==2) dif = "medium"
 				if(all[i].difficulty==3) dif = "hard"
 				checked = all[i].is_called;
-				
+
 				cards+='<div class="tile  ';
 				if(checked)
 				{
@@ -82,7 +81,6 @@ router.get('/',(req,res)=>{
 		res.writeHead(200, {'Content-Type': 'text/html'});
 		res.end(html);
 		sql.close();
-		console.log(start-Date.now());
 	});
 });
 

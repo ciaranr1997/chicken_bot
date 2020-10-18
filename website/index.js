@@ -80,10 +80,6 @@ app.get('/', (req, res) => {
 	header = fs.readFileSync("pageparts/header.html").toString();
 	if(req.user)
 	{
-		//load page parts
-		console.log("user exists");
-
-		console.log(req.user.id);
 		fs.readFile('html/default.html', (e, data) => {
 	    if (e) throw e;
 
@@ -94,7 +90,6 @@ app.get('/', (req, res) => {
 			html = html.replace("${user.image}",req.user.image);
 
 		  res.end(html);
-			console.log(req.user);
 		});
 	} else
 	{
@@ -107,7 +102,6 @@ app.get('/sql',async (req, res) => {
 	sql.connect();
 	result = await sql.syncQuery("select * from fowl_quotes");
 	sql.close();
-	console.log(result);
 	res.send(result);
 });
 

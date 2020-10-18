@@ -16,7 +16,6 @@ passport.use(new DiscordStrategy({
 		if(profile.guilds[i].id==config.server_id)
 		{
 			perms = profile.guilds[i].permissions;
-			console.log( profile.guilds[i]);
 			break;
 		}
 	}

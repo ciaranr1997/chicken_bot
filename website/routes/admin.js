@@ -17,8 +17,6 @@ router.all("*", (req,res, next) => {
 	 	}
 	 	else
 	 	{
-			console.log("user");
-			console.log(req.user)
 			res.redirect("/error");
 			return;
 		}
