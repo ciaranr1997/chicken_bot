@@ -4,6 +4,7 @@ const fs = require('fs');
 
 
 router.get('/',(req,res)=>{
+	start = Date.now();
 	if(!req.user)
 	{
 		res.redirect('/');
@@ -18,6 +19,8 @@ router.get('/',(req,res)=>{
 		sql.connect();
 		is_active = await sql.syncQuery("select setting_value from bingo_settings where setting=\"is_active\"");
 		is_active = is_active[0].setting_value;
+		//allCards = await sql.syncQuery("select * from bingo_options");
+
 		if(is_active==1)
 		{
 
@@ -46,10 +49,20 @@ router.get('/',(req,res)=>{
 				//check if the square has been checked off
 				id= all[i].id;
 				dif = "";
+				//checked = await sql.syncQuery("select is_called from bingo_options where id='"+id+"'");
+				//checked = checked[0].is_called;
+				//checked = allCards.find(o => o.id === id).is_called;
 				if(all[i].difficulty==1) dif = "easy"
 				if(all[i].difficulty==2) dif = "medium"
 				if(all[i].difficulty==3) dif = "hard"
-				cards+='<div class="tile  '+dif+'" id="card-'+id+'">';
+				checked = all[i].is_called;
+				
+				cards+='<div class="tile  ';
+				if(checked)
+				{
+					cards+="checked "
+				}
+				cards+= dif+'" id="card-'+id+'">';
 				cards+='<span class="bingo-text">';
 				cards+=all[i].card_text;
 				cards+='</span>'
@@ -68,6 +81,8 @@ router.get('/',(req,res)=>{
 		html = html.replace("${user.image}",req.user.image);
 		res.writeHead(200, {'Content-Type': 'text/html'});
 		res.end(html);
+		sql.close();
+		console.log(start-Date.now());
 	});
 });
 

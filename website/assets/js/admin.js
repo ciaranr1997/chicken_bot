@@ -2,7 +2,9 @@
 var row="<tr class=\"option\" id=\"row-$id\">";
 row+="<td><span class=\"optionText\">$text</span><input id=\"val-$id\" hidden val=\"$text\" class=\"valIn\"></td>";
 row+="<td><span class=\"optionDifficulty\">$difficulty</span><input type=number hidden id=\"dif-$id\" val=\"$difficulty\"></td>";
-row+="<td><button class=\"edit\" id=\"edit-$id\">Edit</button><button class=\"save\" id=\"save-$id\">Save</button><button class=\"disable\" id=\"disable-$id\">Disable</button><button class=\"enable\" id=\"enable-$id\">Enable</button></td>";
+row+="<td><button class=\"edit\" id=\"edit-$id\">Edit</button><button class=\"save\" id=\"save-$id\">Save</button><button class=\"disable\" id=\"disable-$id\">Disable</button><button class=\"enable\" id=\"enable-$id\">Enable</button>";
+row+="<input type='checkbox' class=\"checkSquare\" id=\"check-$id\">";
+row+="</td>";
 row+="</tr>";
 
 $(".cardArea").on("click", ".save", function()
@@ -64,6 +66,26 @@ $(".cardArea").on("click", ".enable" ,function()
 			if(data.success)
 			{
 				$("#row-"+id).removeClass("disabled");
+			}
+			else if (data.error)
+			{
+					alert("There has been an error doing this. Please refresh the page and try again :(\n\n"+data.error);
+			}
+	 });
+});
+
+$(".cardArea").on("click", ".checkSquare" ,function()
+{
+	id=$(this).attr("id").replace("check-","");
+	checked = $(this).is(":checked") ? 1 : 0
+	$.ajax({
+			 url: "/requests/bingo_admin/check",
+			 method: "POST",
+			 data: { id: id, value: checked}
+	 }).then(function(data) {
+			if(data.success)
+			{
+
 			}
 			else if (data.error)
 			{

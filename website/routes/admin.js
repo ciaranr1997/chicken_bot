@@ -79,7 +79,13 @@ router.get('/bingo',(req,res)=>{
 			optionArea+="<td><span class=\"optionText\">"+option.card_text+"</span><input id=\"val-"+option.id+"\" hidden value=\""+option.card_text+"\" class=\"valIn\"></td>";
 			optionArea+="<td><span class=\"optionDifficulty\">"+option.difficulty+"</span><input type=number hidden id=\"dif-"+option.id+"\" class=\"difInput\" value=\""+option.difficulty+"\"></td>";
 			optionArea+="<td><button class=\"edit\" id=\"edit-"+option.id+"\">Edit</button><button class=\"save\" id=\"save-"+option.id+"\">Save</button>";
-			optionArea+="<button class=\"disable\" id=\"disable-"+option.id+"\">Disable</button><button class=\"enable\" id=\"enable-"+option.id+"\">Enable</button><input type='checkbox' id=\"check-"+option.id+"\">";
+			optionArea+="<button class=\"disable\" id=\"disable-"+option.id+"\">Disable</button><button class=\"enable\" id=\"enable-"+option.id+"\">Enable</button>";
+			optionArea+="<input type='checkbox' class=\"checkSquare\" id=\"check-"+option.id+"\"";
+			if(option.is_called)
+			{
+				optionArea+=" checked ";
+			}
+			optionArea+=">";
 			optionArea+="</td>";
 			optionArea+="</tr>";
 		});
@@ -89,6 +95,7 @@ router.get('/bingo',(req,res)=>{
 		html = html.replace("${admin.bingo.cards}",optionArea);
 		res.writeHead(200, {'Content-Type': 'text/html'});
 		res.end(html);
+		sql.close();
 	});
 });
 
@@ -119,7 +126,6 @@ router.get('/bingo/cards',(req,res)=>{
 				card = result[u];
 				card_data = JSON.parse(card.card_data);
 				myUser = await client.users.fetch(card.user_id);
-				console.log(myUser)
 				userName = myUser.username+"#"+myUser.discriminator
 				cards+="<p class=\"user-title\">"+userName+"</p>";
 				cards+="<div class=\"board\">"
@@ -132,7 +138,13 @@ router.get('/bingo/cards',(req,res)=>{
 					if(card_data[i].difficulty==1) dif = "easy"
 					if(card_data[i].difficulty==2) dif = "medium"
 					if(card_data[i].difficulty==3) dif = "hard"
-					cards+='<div class="tile  '+dif+'" id="card-'+id+'">';
+					checked = card_data[i].is_called;
+					cards+='<div class="tile  ';
+					if(checked)
+					{
+						cards+="checked "
+					}
+					cards+= dif+'" id="card-'+id+'">';
 					cards+='<span class="bingo-text">';
 					cards+=card_data[i].card_text;
 					cards+='</span>'
@@ -153,6 +165,7 @@ router.get('/bingo/cards',(req,res)=>{
 		html = html.replace("${user.image}",req.user.image);
 		res.writeHead(200, {'Content-Type': 'text/html'});
 		res.end(html);
+		sql.close();
 	});
 });
 

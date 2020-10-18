@@ -124,6 +124,24 @@ admin =
 
 				});*/
 			}
+			else if(params[1]=="check")
+			{
+				checked = body.value;
+				console.log(checked);
+				query = "UPDATE bingo_options SET is_called="+checked+" WHERE id="+id+";"
+				result = await sql.syncQuery(query).catch(function(err)
+				{
+						this.error("query failed :(");
+						this.res.writeHead(200, {'Content-Type': 'text/json'});
+						this.res.end('{"error":"Request to update this square has failed."}');
+						return;
+
+				})
+			}
+			else
+			{
+
+			}
 
 		}
 		this.end();

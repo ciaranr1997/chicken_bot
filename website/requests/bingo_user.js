@@ -1,4 +1,4 @@
-redact =
+admin =
 {
 	params:[],
 	req:{},
@@ -8,6 +8,7 @@ redact =
 		this.params = reqParams;
 		this.req = req;
 		this.res = res;
+		body = req.body
 		this.run();
 	},
 	run:async function()
@@ -17,29 +18,21 @@ redact =
 			this.error("You are not currently logged in");
 			return;
 		}
-		quoteId = request.params[1];
-		if(isNaN(quoteId))
-		{
-			this.error("You don't seem to have sent a legit request to redact a quote");
-			return;
-		}
+		id = body.id;
 		let sql = require("../../sql.js");
 		sql.connect();
-		query = "UPDATE fowl_quotes SET user_id=0 WHERE user_id="+this.req.user.id+" AND id='"+quoteId+"'";
-
-		result = await sql.syncQuery(query).catch(function(err)
+		if(params[1]=="check")
 		{
-				this.error("query failed :(");
+			checked = await sql.syncQuery("select is_called from bingo_options where id='"+id+"'");
+			checked = checked[0].is_called;
+			if(checked==0)
+			{
 				this.res.writeHead(200, {'Content-Type': 'text/json'});
-				this.res.end('{"error":"request was a failure updating this quote"}');
+				this.res.end('{"error":"Denied"}');
 				return;
+			}
+		}
 
-		}).finally(()=>
-		{
-
-		});
-		console.log(result);
-		console.log(query);
 		sql.close();
 		this.end();
 
@@ -56,4 +49,4 @@ redact =
 	}
 };
 
-module.exports=redact;
+module.exports=admin;
