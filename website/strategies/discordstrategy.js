@@ -19,7 +19,6 @@ passport.use(new DiscordStrategy({
 			break;
 		}
 	}
-	//console.log(profile);
 	user =
 	{
 		id: profile.id,

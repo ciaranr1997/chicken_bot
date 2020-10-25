@@ -13,12 +13,14 @@ module.exports = {
 	},
 	close:function()
 	{
+
 		this.db.end((err) => {
 		  if (err) {
 			console.error(err.message);
 		  }
 		});
-
+		this.db.destroy();
+		this.db = null;
 	},
 	query:function(queryString, callback,msg)
 	{

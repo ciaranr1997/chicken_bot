@@ -20,6 +20,8 @@ router.get('/',(req,res)=>{
 		is_active = is_active[0].setting_value;
 		//allCards = await sql.syncQuery("select * from bingo_options");
 
+		checkedQuery = "SELECT * FROM bingo_options";
+		checkedArr = await sql.syncQuery(checkedQuery);
 		if(is_active==1)
 		{
 
@@ -36,7 +38,7 @@ router.get('/',(req,res)=>{
 				shuffle(all);
 				cardData = JSON.stringify(all);
 				sql.run("INSERT INTO bingo_cards (user_id,card_data,is_active) VALUES(?,?,1)",[req.user.id,cardData]);
-				sql.close();
+
 			}
 			else
 			{
@@ -54,7 +56,7 @@ router.get('/',(req,res)=>{
 				if(all[i].difficulty==1) dif = "easy"
 				if(all[i].difficulty==2) dif = "medium"
 				if(all[i].difficulty==3) dif = "hard"
-				checked = all[i].is_called;
+				checked = checked = checkedArr.find(x => x.id === id).is_called;
 
 				cards+='<div class="tile  ';
 				if(checked)
@@ -75,12 +77,12 @@ router.get('/',(req,res)=>{
 			html = html.replace("${bingo.cards}","<div class=\"bingo-err\">Bingo is currently closed. Please check back another time.</div>");
 		}
 
+		sql.close();
 		html = html.replace("${site.header}",header);
 		html = html.replace("${site.nav}",nav);
 		html = html.replace("${user.image}",req.user.image);
 		res.writeHead(200, {'Content-Type': 'text/html'});
 		res.end(html);
-		sql.close();
 	});
 });
 

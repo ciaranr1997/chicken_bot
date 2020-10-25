@@ -11,6 +11,11 @@ $("div.tile").click(function() {
 				if(data.success)
 				{
 					$(el).addClass("checked");
+					//check if all cards and now selected
+					if($('.checked').length==16)
+					{
+						callBingo();
+					}
 				}
 				else if (data.error)
 				{
@@ -26,4 +31,19 @@ $("div.tile").click(function() {
 		 });
 	}
 
+});
+function callBingo()
+{
+	bingo = "<div class='bingo-called'><img src='/static/images/bingo.png'/></div>";
+	$("body").append(bingo);
+	$(".bingo-called").show( "slow", function() {
+    confetti.start();
+		setTimeout(function(){ confetti.stop() }, 3000);
+  });
+}
+$( document ).ready(function() {
+	if($('.checked').length==16)
+	{
+		callBingo();
+	}
 });

@@ -109,12 +109,15 @@ router.get('/bingo/cards',(req,res)=>{
 	nav = fs.readFileSync("pageparts/nav.html").toString();
 	header = fs.readFileSync("pageparts/header.html").toString();
 	fs.readFile('html/admin/cards.html', async (e, data) => {
+
 		html = data.toString();
-		cardQuery = "SELECT * from bingo_cards WHERE is_active=1 ORDER BY ID ASC"
+		cardQuery = "SELECT * from bingo_cards WHERE is_active=1 ORDER BY ID ASC";
 		cards="";
 		let sql = require("../../sql.js");
 		sql.connect();
 		result = await sql.syncQuery(cardQuery);
+		checkedQuery = "SELECT * FROM bingo_options";
+		checkedArr = await sql.syncQuery(checkedQuery);
 		if(result.length>0)
 		{
 
@@ -136,7 +139,7 @@ router.get('/bingo/cards',(req,res)=>{
 					if(card_data[i].difficulty==1) dif = "easy"
 					if(card_data[i].difficulty==2) dif = "medium"
 					if(card_data[i].difficulty==3) dif = "hard"
-					checked = card_data[i].is_called;
+					checked = checkedArr.find(x => x.id === id).is_called;
 					cards+='<div class="tile  ';
 					if(checked)
 					{
