@@ -36,8 +36,8 @@ function callBingo()
 {
 	bingo = "<div class='bingo-called'><img src='/static/images/bingo.png'/></div>";
 	$("body").append(bingo);
-	$(".bingo-called").show( "slow", function() {
-    confetti.start();
+  confetti.start();
+	$(".bingo-called").fadeIn( "slow", function() {
 		setTimeout(function(){ confetti.stop() }, 3000);
   });
 }
