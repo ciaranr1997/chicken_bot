@@ -15,9 +15,9 @@ router.get('/img', async function(req,res){
 
 	//get rank
 	let sql = require("../../sql.js");
-	sql.connect();
+	;
 	rows = await sql.syncQuery("select * from fowl_levels order by points desc LIMIT 5");
-	sql.close();
+	;
 	ctx.fillStyle = "#000";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
 	rank = 0;
@@ -53,7 +53,7 @@ router.get('/img', async function(req,res){
 
 router.get('/', async function(req,res){
 	let sql = require("../../sql.js");
-	sql.connect();
+	;
 	rows = await sql.syncQuery("select * from fowl_levels order by points desc");
 
 	header = fs.readFileSync("pageparts/header.html").toString();

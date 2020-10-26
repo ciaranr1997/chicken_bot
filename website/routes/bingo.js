@@ -15,7 +15,7 @@ router.get('/',(req,res)=>{
 
 		html = data.toString();
 		let sql = require("../../sql.js");
-		sql.connect();
+		//;
 		is_active = await sql.syncQuery("select setting_value from bingo_settings where setting=\"is_active\"");
 		is_active = is_active[0].setting_value;
 		//allCards = await sql.syncQuery("select * from bingo_options");
@@ -77,7 +77,7 @@ router.get('/',(req,res)=>{
 			html = html.replace("${bingo.cards}","<div class=\"bingo-err\">Bingo is currently closed. Please check back another time.</div>");
 		}
 
-		sql.close();
+		//await ;
 		html = html.replace("${site.header}",header);
 		html = html.replace("${site.nav}",nav);
 		html = html.replace("${user.image}",req.user.image);

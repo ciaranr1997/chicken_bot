@@ -8,9 +8,9 @@ router.get('/',(req,res)=>{
 	header = fs.readFileSync("pageparts/header.html").toString();
 	fs.readFile('html/quotes.html', async (e, data) => {
 		let sql = require("../../sql.js");
-		sql.connect();
+		;
 		quoteList = await sql.syncQuery("select * from fowl_quotes where user_id='"+req.user.id+"'");
-		sql.close();
+		;
 		output = "";
 		for(i=0;i<quoteList.length;i++)
 		{

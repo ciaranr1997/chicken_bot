@@ -1,68 +1,90 @@
-const mysql = require('mysql');
 const config = require("./config.json");
 
-module.exports = {
-	db:"",
-	debug:"",
-	connect:function(){
+// Load module
+var mysql = require('mysql');
+// Initialize pool
+var pool      =    mysql.createPool(config.mysql);
+module.exports.pool = pool;
+exports.syncQuery=function(query){
 
-		this.db = mysql.createConnection(config.mysql);
-		this.db.connect(function(err) {
-		  if (err) throw err;
-		});
-	},
-	close:function()
-	{
-
-		this.db.end((err) => {
-		  if (err) {
-			console.error(err.message);
-		  }
-		});
-		this.db.destroy();
-		this.db = null;
-	},
-	query:function(queryString, callback,msg)
-	{
-        this.db.query(queryString, [], (err, rows) => {
-          if (err) {
-						console.log("ERROR");
-            console.log(err);
-          }
-						rows =JSON.stringify(rows);
-						rows = JSON.parse(rows);
-           	callback(msg,rows);
-        });
-    },
-    run:async function(sql,params)
-    {
-        this.db.query(sql, params, function(err){
-            if(err)
-            {
-							console.log("run "+sql);
-          		console.log(err);
-
-            }
-        });
-    },
-		syncQuery:function(queryString)
-		{
-			db = this.db
-				return new Promise(function(resolve, reject){
-        	db.query(queryString, [], (err, rows) => {
-	          if (err) {
-							console.log("ERROR");
-	            console.log(err);
-							reject(new Error(err));
-	          }
+		return new Promise(function(resolve, reject){
+			pool.getConnection(function(err,connection){
+        if (err) {
+          connection.release();
+          throw err;
+        }
+        connection.query(query,function(err,rows){
+            connection.release();
+            if(!err) {
 							rows = JSON.stringify(rows);
 							rows = JSON.parse(rows);
-						if(rows === undefined){
-                reject(new Error("Error rows is undefined"));
-            }else{
-                resolve(rows);
+							resolve(rows);
             }
-        	});
-				});
-	    }
+        });
+        connection.on('error', function(err) {
+              throw err;
+              return;
+        });
+    	});
+		});
+	}
+exports.query = function(queryString, callback, params = [])
+{
+		pool.getConnection(function(err,connection){
+      if (err) {
+        connection.release();
+        throw err;
+      }
+      connection.query(queryString, params,function(err,rows){
+          connection.release();
+          if(!err) {
+						rows =JSON.stringify(rows);
+						rows = JSON.parse(rows);
+						callback(rows);
+          }
+      });
+      connection.on('error', function(err) {
+            throw err;
+            return;
+      });
+  	});
 }
+exports.botQuery = function(queryString, callback,msg, params = [])
+{
+		pool.getConnection(function(err,connection){
+      if (err) {
+        connection.release();
+        throw err;
+      }
+      connection.query(queryString, params,function(err,rows){
+          connection.release();
+          if(!err) {
+						callback(msg,rows);
+          }
+      });
+      connection.on('error', function(err) {
+            throw err;
+            return;
+      });
+  	});
+}
+exports.run = function(queryString, params = [])
+{
+		pool.getConnection(function(err,connection){
+      if (err) {
+        connection.release();
+        throw err;
+      }
+      connection.query(queryString, params,function(err,rows){
+          connection.release();
+          if(!err) {
+          }
+      });
+      connection.on('error', function(err) {
+            throw err;
+            return;
+      });
+  	});
+}
+exports.connect = function(){}//nothing here.. just for legacy while I clean up.
+exports.close = function(){}

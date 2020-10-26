@@ -14,9 +14,9 @@ router.get('/[x0-9]*', async function(req,res){
 	user = req.params[0].replace(".png","");
 	//get rank
 	let sql = require("../../sql.js");
-	sql.connect();
+	;
 	rows = await sql.syncQuery("select * from fowl_levels order by points desc");
-	sql.close();
+	;
 	rank = 0;
 	for(i=0;i<rows.length;i++)
 	{

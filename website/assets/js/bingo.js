@@ -1,3 +1,4 @@
+
 $("div.tile").click(function() {
   if(!$(this).hasClass("checked"))
 	{
@@ -37,8 +38,10 @@ function callBingo()
 	bingo = "<div class='bingo-called'><img src='/static/images/bingo.png'/></div>";
 	$("body").append(bingo);
   confetti.start();
+	playAudio();
 	$(".bingo-called").fadeIn( "slow", function() {
-		setTimeout(function(){ confetti.stop() }, 3000);
+		setTimeout(function(){ confetti.stop(); pauseAudio(); }, 3000);
+
   });
 }
 $( document ).ready(function() {
@@ -47,3 +50,16 @@ $( document ).ready(function() {
 		callBingo();
 	}
 });
+
+
+
+function playAudio() {
+	x = document.getElementById("clapping");
+	x.volume = 0.05
+  x.play();
+}
+
+function pauseAudio() {
+	x = document.getElementById("clapping");
+  x.pause();
+}

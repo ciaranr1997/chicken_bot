@@ -20,7 +20,7 @@ admin =
 		}
 		id = body.id;
 		let sql = require("../../sql.js");
-		sql.connect();
+		;
 		if(params[1]=="check")
 		{
 			checked = await sql.syncQuery("select is_called from bingo_options where id='"+id+"'");
@@ -33,7 +33,7 @@ admin =
 			}
 		}
 
-		sql.close();
+		;
 		this.end();
 
 	},

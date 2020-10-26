@@ -56,7 +56,7 @@ router.get('/bingo',(req,res)=>{
 		optionArea = "<div class=\"cardArea\"><table class=\"cards\">";
 		optionArea+="<tr><th>Text</th><th>Difficulty</th><th>Actions</th>"
 		let sql = require("../../sql.js");
-		sql.connect();
+		;
 		is_active = await sql.syncQuery("select setting_value from bingo_settings where setting=\"is_active\"");
 		is_active = is_active = is_active[0].setting_value;
 		if(is_active==1)
@@ -93,7 +93,7 @@ router.get('/bingo',(req,res)=>{
 		html = html.replace("${admin.bingo.cards}",optionArea);
 		res.writeHead(200, {'Content-Type': 'text/html'});
 		res.end(html);
-		sql.close();
+		;
 	});
 });
 
@@ -114,7 +114,7 @@ router.get('/bingo/cards',(req,res)=>{
 		cardQuery = "SELECT * from bingo_cards WHERE is_active=1 ORDER BY ID ASC";
 		cards="";
 		let sql = require("../../sql.js");
-		sql.connect();
+		;
 		result = await sql.syncQuery(cardQuery);
 		checkedQuery = "SELECT * FROM bingo_options";
 		checkedArr = await sql.syncQuery(checkedQuery);
@@ -166,7 +166,7 @@ router.get('/bingo/cards',(req,res)=>{
 		html = html.replace("${user.image}",req.user.image);
 		res.writeHead(200, {'Content-Type': 'text/html'});
 		res.end(html);
-		sql.close();
+		;
 	});
 });
 

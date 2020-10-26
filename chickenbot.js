@@ -32,9 +32,9 @@ client.on('message', async msg => {
 				{
 					let sql = require("./sql.js")
 					sql.debug = debug;
-					sql.connect();
-					sql.query("SELECT * FROM fowl_quotes where user_id="+msg.author.id,ListQuotes,msg );
-					sql.close();
+					;
+					sql.botQuery("SELECT * FROM fowl_quotes where user_id="+msg.author.id,ListQuotes,msg );
+					;
 				}
 				if(chat.includes(config.prefix+"redact"))
 				{
@@ -71,19 +71,19 @@ client.on('message', async msg => {
 					{
 						let sql = require("./sql.js")
 						sql.debug = debug;
-						sql.connect();
-						sql.query("select * from fowl_levels order by points desc",
+						;
+						sql.botQuery("select * from fowl_levels order by points desc",
 						makeRank,msg);
-						sql.close();
+						;
 					}
 					//rquote command
 					if(chat.includes(config.prefix+"rquote"))
 					{
 						let sql = require("./sql.js")
 						sql.debug = debug;
-						sql.connect();
-						sql.query("SELECT * FROM fowl_quotes ORDER BY RAND() LIMIT 1",sayQuote,msg);
-						sql.close();
+						;
+						sql.botQuery("SELECT * FROM fowl_quotes ORDER BY RAND() LIMIT 1",sayQuote,msg);
+						;
 					}
 
 					//lquote command
@@ -92,9 +92,9 @@ client.on('message', async msg => {
 						let sql = require("./sql.js")
 
 						sql.debug = debug;
-						sql.connect();
-						sql.query("SELECT * FROM fowl_quotes ORDER BY id desc LIMIT 1",sayQuote,msg);
-						sql.close();
+						;
+						sql.botQuery("SELECT * FROM fowl_quotes ORDER BY id desc LIMIT 1",sayQuote,msg);
+						;
 					}
 
 					//hug command
@@ -162,7 +162,7 @@ client.on('message', async msg => {
 					let sql = require("./sql.js")
 					now = Date.now();
 					sql.debug = debug;
-					sql.connect();
+					;
 					sql.run(
 						"INSERT INTO egg_messages (message_content,user_tag,user_id,timestamp,message_sent,channel_name) VALUES(?,?,?,?,?,?)",
 						[
@@ -173,7 +173,7 @@ client.on('message', async msg => {
 							msg.channel.name
 						]
 					);
-					sql.close();
+					;
 					user = await client.users.fetch("187262396237217792");
 
 					user.send("Message from: "+msg.author.tag+"\n In: "+msg.channel.name+"\n_____\n"+msg.content);
@@ -195,7 +195,7 @@ client.on("messageDelete", async function (messageDelete) {
 	let sql = require("./sql.js")
 	now = Date.now();
 	sql.debug = debug;
-	sql.connect();
+	;
 	sql.run(
 		"INSERT INTO messages_deleted (message_content,user_tag,user_id,timestamp,message_sent,channel_name) VALUES(?,?,?,?,?,?)",
 		[
@@ -206,7 +206,7 @@ client.on("messageDelete", async function (messageDelete) {
 			messageDelete.channel.name
 		]
 	);
-	sql.close();
+	;
 });
 
 ///log message edits
@@ -219,7 +219,7 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
 	let sql = require("./sql.js")
 	now = Date.now()/1000;
 	sql.debug = debug;
-	sql.connect();
+	;
 	sql.run(
 		"INSERT INTO messages_edited (old_content,new_content,user_tag,user_id,timestamp,channel_name) VALUES(?,?,?,?,?,?)",
 		[
@@ -231,7 +231,7 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
 			oldMessage.channel.name
 		]
 	);
-	sql.close();
+	;
 });
 
 
@@ -375,9 +375,9 @@ function schedule(movieparams,msg)
 					/******* Input Schedule******/
 					/*let sql = require("./sql.js")
 					sql.debug = debug;
-					sql.connect();
+					;
 					sql.run("SELECT * FROM movie_nights" );
-					sql.close();*/
+					;*/
 				})
 			});
 		}
@@ -496,14 +496,14 @@ function HourlyCheck(p1)
 		console.log("Is update hour :)");
 		let sql = require("./sql.js")
 		sql.debug = debug;
-		sql.connect();
-		sql.query("select user_id, SUM(points) as pointies from fowl_points group by user_id order by pointies desc",updateRoles,"");
-		sql.close();
+		;
+		sql.botQuery("select user_id, SUM(points) as pointies from fowl_points group by user_id order by pointies desc",updateRoles,"");
+		;
 	}
 	//renew subscription
 	/*let sql = require("./sql.js")
 	sql.debug = debug;
-	sql.connect();
+	;
 
 
 	now = Date.now()/1000;
@@ -512,10 +512,10 @@ function HourlyCheck(p1)
 	//check for movie nights within the next hour
 	hour = now+3600+900;
 	movieHour = "SELECT * FROM movie_nights WHERE starttime>"+now+" AND starttime<"+hour+" ORDER BY id ASC";
-	sql.query(movieCheck,movieHour);
+	sql.botQuery(movieCheck,movieHour);
 	offset = 60*60000;
 	debug.send("Running hourly tasks in "+offset);
-	sql.close();
+	;
 	if(p1!="nosub")
 	{
 		setTimeout(HourlyCheck,offset);
@@ -647,9 +647,9 @@ async function addQuote(msg)
 				quote = options[message.content];
 				let sql = require("./sql.js")
 				sql.debug = debug;
-				sql.connect();
+				;
 				sql.run("INSERT INTO fowl_quotes (user_id,quote) VALUES(?,?)",[men,quote]);
-				sql.close();
+				;
 			}
 			else
 			{
@@ -686,10 +686,10 @@ function redactQuote(quid,msg)
 {
 	let sql = require("./sql.js")
 	sql.debug = debug;
-	sql.connect();
+	;
 	sql.run("UPDATE fowl_quotes set user_id=0 where id="+qid+" AND user_id='"+msg.author.id+"'" );
 	sql.run("INSERT INTO redacted_quotes (quote_id,user_id) VALUES ("+qid+",'"+msg.author.id+"')" );
-	sql.close();
+	;
 	msg.reply("I have redacted this quote for you. If you require further action on this please DM a member of the mod team for this to be resolved");
 }
 
@@ -789,14 +789,14 @@ function messageReceived(msg)
 	let sql = require("./sql.js");
 
 	sql.debug = debug;
-	sql.connect();
+	;
 	sql.run(
 		"INSERT INTO  fowl_levels (user_id,points) VALUES(\""+msg.author.id+"\","+points+") ON DUPLICATE KEY UPDATE points=points+"+points+";"
 	);
 	sql.run(
 		"INSERT INTO fowl_points (user_id,points,timestamp) VALUES(\""+msg.author.id+"\","+points+",\""+msg.createdTimestamp+"\")"
 	);
-	sql.close();
+	;
 }
 
 function makeRank(msg,rows)

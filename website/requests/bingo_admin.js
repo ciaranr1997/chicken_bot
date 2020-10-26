@@ -25,7 +25,7 @@ admin =
 		}
 
 		let sql = require("../../sql.js");
-		sql.connect();
+		;
 		if(params[1]=="new")
 		{
 			difficulty = body.difficulty;
@@ -144,7 +144,7 @@ admin =
 			}
 
 		}
-		sql.close();
+		;
 		this.end();
 
 	},

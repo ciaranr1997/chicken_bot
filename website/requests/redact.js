@@ -24,7 +24,7 @@ redact =
 			return;
 		}
 		let sql = require("../../sql.js");
-		sql.connect();
+		;
 		query = "UPDATE fowl_quotes SET user_id=0 WHERE user_id="+this.req.user.id+" AND id='"+quoteId+"'";
 
 		result = await sql.syncQuery(query).catch(function(err)
@@ -38,9 +38,7 @@ redact =
 		{
 
 		});
-		console.log(result);
-		console.log(query);
-		sql.close();
+		;
 		this.end();
 
 	},

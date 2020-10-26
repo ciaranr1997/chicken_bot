@@ -10,6 +10,7 @@ const scoreRoute = require('./routes/scorecard');
 const quoteRoute = require('./routes/quotes');
 const adminRoute = require('./routes/admin');
 const leaderRoute = require('./routes/leaderboard');
+const testRoute = require('./routes/testing');
 const requestRoute = require('./requests');
 const DiscordStrategy = require('./strategies/discordstrategy.js');
 const config = require('../config.json');
@@ -35,6 +36,8 @@ app.use('/auth',authRoute);
 app.use('/admin',adminRoute);
 app.use('/requests',requestRoute);
 app.use('/leaderboard',leaderRoute);
+app.use('/tests',testRoute);
+
 
 app.get('/error', (req, res) => {
 	fs.readFile('html/error.html', (e, data) => {
@@ -99,9 +102,9 @@ app.get('/', (req, res) => {
 
 app.get('/sql',async (req, res) => {
 	let sql = require("../sql.js");
-	sql.connect();
+	;
 	result = await sql.syncQuery("select * from fowl_quotes");
-	sql.close();
+	;
 	res.send(result);
 });
 
