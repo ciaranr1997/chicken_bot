@@ -157,7 +157,7 @@ $("#reset").click(function()
 		 }).then(function(data) {
 				if(data.success)
 				{
-
+					$('input:checkbox').removeAttr('checked');
 				}
 				else if (data.error)
 				{

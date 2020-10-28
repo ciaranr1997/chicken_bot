@@ -63,7 +63,7 @@ admin =
 		}
 		else if(params[1]=="reset")
 		{
-			query = "UPDATE bingo_cards set is_active=0;";
+			query = "UPDATE bingo_cards set is_active=0";
 			result = await sql.syncQuery(query).catch(function(err)
 			{
 					this.error("query failed :(");
@@ -71,7 +71,19 @@ admin =
 					this.res.end('{"error":"Request to update the bingo has failed."}');
 					return;
 
-			})
+			});
+
+			query2 = "UPDATE bingo_options set is_called=0 where is_called=1;";
+			result2 = await sql.syncQuery(query2).catch(function(err)
+			{
+					this.error("query failed :(");
+					this.res.writeHead(200, {'Content-Type': 'text/json'});
+					this.res.end('{"error":"Request to update the bingo has failed."}');
+					return;
+
+			});
+			console.log(result2);
+			console.log(result);
 		}
 		else
 		{

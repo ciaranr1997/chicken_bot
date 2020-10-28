@@ -7,27 +7,31 @@ var pool      =    mysql.createPool(config.mysql);
 module.exports.pool = pool;
 exports.syncQuery=function(query){
 
-		return new Promise(function(resolve, reject){
-			pool.getConnection(function(err,connection){
-        if (err) {
+	return new Promise(function(resolve, reject){
+		pool.getConnection(function(err,connection){
+      if (err) {
+        connection.release();
+        throw err;
+      }
+      pool.query(query,function(err,rows){
           connection.release();
-          throw err;
-        }
-        connection.query(query,function(err,rows){
-            connection.release();
-            if(!err) {
-							rows = JSON.stringify(rows);
-							rows = JSON.parse(rows);
-							resolve(rows);
-            }
-        });
-        connection.on('error', function(err) {
-              throw err;
-              return;
-        });
-    	});
-		});
-	}
+          if(!err) {
+						rows = JSON.stringify(rows);
+						rows = JSON.parse(rows);
+						resolve(rows);
+          }
+      });
+      connection.on('error', function(err) {
+				if(err.code === 'PROTOCOL_CONNECTION_LOST') {
+				}
+				else
+				{
+					throw err;
+				}
+      });
+  	});
+	});
+}
 exports.query = function(queryString, callback, params = [])
 {
 		pool.getConnection(function(err,connection){
@@ -44,8 +48,12 @@ exports.query = function(queryString, callback, params = [])
           }
       });
       connection.on('error', function(err) {
-            throw err;
-            return;
+				if(err.code === 'PROTOCOL_CONNECTION_LOST') {
+				}
+				else
+				{
+					throw err;
+				}
       });
   	});
 }
@@ -63,8 +71,12 @@ exports.botQuery = function(queryString, callback,msg, params = [])
           }
       });
       connection.on('error', function(err) {
-            throw err;
-            return;
+				if(err.code === 'PROTOCOL_CONNECTION_LOST') {
+				}
+				else
+				{
+					throw err;
+				}
       });
   	});
 }
@@ -81,8 +93,12 @@ exports.run = function(queryString, params = [])
           }
       });
       connection.on('error', function(err) {
-            throw err;
-            return;
+				if(err.code === 'PROTOCOL_CONNECTION_LOST') {
+				}
+				else
+				{
+					throw err;
+				}
       });
   	});
 }
