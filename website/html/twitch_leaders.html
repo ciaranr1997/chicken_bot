@@ -1,0 +1,34 @@
+<html>
+	<head>
+		${site.header}
+		<link rel="stylesheet" href="/static/css/twitch_leaders.css">
+		<link rel="stylesheet" href="/static/plugins/tablesorter/css/theme.default.min.css">
+		<script src="/static/plugins/tablesorter/js/jquery.tablesorter.min.js"></script>
+		<script src="/static/plugins/tablesorter/js/jquery.tablesorter.widgets.min.js"></script>
+		<script src="/static/plugins/tablesorter/js/widgets/widget-pager.min.js"></script>
+		<script src="/static/js/twitch_leaders.js"></script>
+		<title>Twitch Leaderboard!</title>
+	</head>
+	<body>
+		${site.nav}
+		<div class="leaderboard">
+			${leaderboard.twitch}
+			<div id="pager" class="pager">
+  <form>
+    <img src="/static/images/first.png" class="first"/>
+    <img src="/static/images/left.png" class="prev"/>
+    <!-- the "pagedisplay" can be any element, including an input -->
+    <span class="pagedisplay" data-pager-output-filtered="{startRow:input} &ndash; {endRow} / {filteredRows} of {totalRows} total rows"></span>
+    <img src="/static/images/right.png" class="next"/>
+    <img src="/static/images/last.png" class="last"/>
+    <select class="pagesize">
+      <option value="10">10</option>
+      <option value="20">20</option>
+      <option value="50">50</option>
+      <option value="all">All Rows</option>
+    </select>
+  </form>
+</div>
+		</div>
+	</body>
+</html>

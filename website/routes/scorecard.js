@@ -7,6 +7,7 @@ const config = require("../../config.json");
 const { createCanvas, loadImage } = require('canvas');
 const canvas = createCanvas(400, 100)
 const ctx = canvas.getContext('2d')
+const url = require('url');
 
 client.login(config.token);
 

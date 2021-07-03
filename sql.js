@@ -5,7 +5,7 @@ var mysql = require('mysql');
 // Initialize pool
 var pool      =    mysql.createPool(config.mysql);
 module.exports.pool = pool;
-exports.syncQuery=function(query){
+exports.syncQuery=function(query,params){
 
 	return new Promise(function(resolve, reject){
 		pool.getConnection(function(err,connection){
@@ -13,13 +13,16 @@ exports.syncQuery=function(query){
         connection.release();
         throw err;
       }
-      pool.query(query,function(err,rows){
+      pool.query(query,params,function(err,rows){
           connection.release();
           if(!err) {
 						rows = JSON.stringify(rows);
 						rows = JSON.parse(rows);
 						resolve(rows);
-          }
+          } else
+					{
+						console.log(err);
+					}
       });
       connection.on('error', function(err) {
 				if(err.code === 'PROTOCOL_CONNECTION_LOST') {
@@ -90,7 +93,10 @@ exports.run = function(queryString, params = [])
       connection.query(queryString, params,function(err,rows){
           connection.release();
           if(!err) {
-          }
+          }else
+					{
+						console.log(err);
+					}
       });
       connection.on('error', function(err) {
 				if(err.code === 'PROTOCOL_CONNECTION_LOST') {

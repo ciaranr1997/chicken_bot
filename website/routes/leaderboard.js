@@ -4,55 +4,67 @@ const fs = require('fs');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const config = require("../../config.json");
-const { createCanvas, loadImage } = require('canvas');
-const canvas = createCanvas(400, 400)
-const ctx = canvas.getContext('2d')
 
 client.login(config.token);
 
-router.get('/img', async function(req,res){
+router.get('/twitch', async function(req,res){
 
 
 	//get rank
 	let sql = require("../../sql.js");
-	;
-	rows = await sql.syncQuery("select * from fowl_levels order by points desc LIMIT 5");
-	;
-	ctx.fillStyle = "#000";
-	ctx.fillRect(0, 0, canvas.width, canvas.height);
-	rank = 0;
+	var twitch = require("../../twitch.js");
+	var util = require("../../utils.js");
+	rows = await sql.syncQuery("select twitch_watchtime.user_id,timer,message_count from twitch_watchtime inner join twitch_messages ON twitch_watchtime.user_id = twitch_messages.user_id order by twitch_watchtime.timer desc");
+	html = fs.readFileSync("html/twitch_leaders.html").toString();
+	header = fs.readFileSync("pageparts/header.html").toString();
+	nav = fs.readFileSync("pageparts/nav.html").toString();
+	html = html.replace("${site.nav}",nav);
+	html = html.replace("${user.image}",req.user.image);
+	html = html.replace("${site.header}",header);
+	leaderTable = "<table class='tablesorter' id='twitchLeaderboard'><thead><tr><th>Position</th><th>Name</th><th>Total Watchtime</th><th>Messages Sent</th></tr></thead><tbody>";
+	idarr = [];
+
 	for(i=0;i<rows.length;i++)
 	{
-		var u = i;
-		var user = rows[i].user_id;
-		var points = rows[i].points;
-		rank = i+1;
-		myUser = await client.users.fetch(user);
-		ctx.font = '20px Impact'
-		ctx.fillStyle = "white";
-		ctx.fillText(myUser.username+"#"+myUser.discriminator, 100, 50+(u*70))
-		ctx.fillText("Rank #"+rank+" ("+points+" xp)",100,70+(u*70));
-		// Draw line under text
-
-
-
-		ctx.drawImage(image, 25, 25+(u*70), 50, 50)
-
-		ctx.beginPath();
-		ctx.arc(50, 50+(u*70), 30, 0, 2 * Math.PI);
-		ctx.strokeStyle = '#000';
-		ctx.lineWidth = 15;
-		ctx.stroke();
+		idarr.push(rows[i].user_id);
 	}
+	user_details = await twitch.getUserDetailsBulk(idarr);
+	for(i=0;i<user_details.length;i++)
+	{
+		index = utils.keySearch(user_details[i].id, rows,"user_id");
+		if(index>=0)
+		{
+			rows[index].user_details=user_details[i];
+		}
+	}
+	for(i=0;i<rows.length;i++)
+	{
+		if(rows[i].user_details==undefined)
+		{
+			username=rows[i].user_id;
+		}
+		else
+		{
+			username = rows[i].user_details.display_name;
+		}
+		leaderTable+="<tr>";
+		leaderTable+="<td>"+(i+1)+"</td>";
+		leaderTable+="<td>"+username+"</td>";
+		leaderTable+="<td>"+util.secondsToDhms(rows[i].timer)+"</td>";
+		leaderTable+="<td>"+rows[i].message_count+"</td>";
+		leaderTable+="</tr>";
+	}
+	leaderTable+="</tbody></table>";
 
+	html = html.replace("${leaderboard.twitch}",leaderTable);
 
-	res.writeHead(200, { 'Content-Type': 'image/png' });
-	res.end(canvas.toBuffer());
+	res.writeHead(200, { 'Content-Type': 'text/html' });
+	res.end(html);
 
 });
 
 router.get('/', async function(req,res){
-	let sql = require("../../sql.js");
+	/*let sql = require("../../sql.js");
 	;
 	rows = await sql.syncQuery("select * from fowl_levels order by points desc");
 
@@ -86,20 +98,18 @@ router.get('/', async function(req,res){
 		html = data.toString();
 		if(req.user)
 		{
-			nav = fs.readFileSync("pageparts/nav.html").toString();
-			html = html.replace("${site.nav}",nav);
-			html = html.replace("${user.image}",req.user.image);
+
 	  } else
 		{
 			nav = "";
 			html = html.replace("${site.nav}",nav);
-		}
-		html = html.replace("${site.header}",header);
-		html = html.replace("${leaderboard.leaders}",leaders);
+		}*/
+
+		html = "test"//html.replace("${leaderboard.leaders}","leaders");
 
 		res.writeHead(200, {'Content-Type': 'text/html'});
 		res.end(html);
-	});
+	//});
 });
 module.exports = router;
 client.on('ready', () => {

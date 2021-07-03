@@ -1,7 +1,8 @@
 const fs = require('fs');
-
+var https = require('https');
 const express = require('express');
 const app = express();
+app.enable('trust proxy',["127.0.0.1:8001","127.0.0.1","http://localhost:8001","http://localhost"]);
 const session = require("express-session");
 const passport = require("passport");
 const authRoute = require('./routes/auth');
@@ -10,10 +11,14 @@ const scoreRoute = require('./routes/scorecard');
 const quoteRoute = require('./routes/quotes');
 const adminRoute = require('./routes/admin');
 const leaderRoute = require('./routes/leaderboard');
+const twitchRoute = require('./routes/twitch');
+const userRoute = require('./routes/user');
 const testRoute = require('./routes/testing');
 const requestRoute = require('./requests');
 const DiscordStrategy = require('./strategies/discordstrategy.js');
 const config = require('../config.json');
+var test = "test";
+
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -35,7 +40,6 @@ app.use('/static', express.static('assets'))
 app.use('/auth',authRoute);
 app.use('/admin',adminRoute);
 app.use('/requests',requestRoute);
-app.use('/leaderboard',leaderRoute);
 app.use('/tests',testRoute);
 
 
@@ -55,6 +59,14 @@ app.get('/error', (req, res) => {
 
 
 app.get('/login', (req, res) => {
+	if(req.hostname!="localhost"&&req.hostname!="chickenbot.xyz")
+	{
+		process.env.protocol = "https";
+	} else
+	{
+		process.env.protocol = "http";
+	}
+	process.env.host = req.hostname;
 	header = fs.readFileSync("pageparts/header.html").toString();
 	fs.readFile('html/login.html', (e, data) => {
 		if (e) throw e;
@@ -67,7 +79,14 @@ app.get('/login', (req, res) => {
 });
 
 app.all("*", (req,res, next) => {
-
+	if(req.hostname!="localhost"&&req.hostname!="chickenbot.xyz")
+	{
+		process.env.protocol = "https";
+	} else
+	{
+		process.env.protocol = "http";
+	}
+	process.env.protocol = req.hostname;
  if(req.user){
   next();
  }else{
@@ -111,17 +130,27 @@ app.get('/sql',async (req, res) => {
 
 
 //Non important routes
+app.use('/twitch',twitchRoute);
+
 app.use('/bingo',bingoRoute);
+
+app.use('/user',userRoute);
 
 app.use('/quotes',quoteRoute);
 
+app.use('/leaderboard',leaderRoute);
 
 
 
 const server = app.listen(8001, () => {
   console.log(`Express running → PORT ${server.address().port}`);
+	var twitch = require("../twitch.js");
+	twitch.getToken();
+
+	//twitch.checkToken(process.env.twitch);
 });
 
+//https.createServer(options, app).listen(3443);
 passport.serializeUser(function(user, done) {
   done(null, user);
 });

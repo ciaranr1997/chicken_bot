@@ -52,7 +52,7 @@ client.on('message', async msg => {
 				{
 
 					if(recentCommand.has(msg.author.id)) return; // we don't want people to be able to spam
-
+					console.log(chat);
 					//ping check, just make sure the bot is alive :)
 					if(chat==="!ping"&&isMod(msg.member)){
 						msg.channel.send("Cluck Cluck");
@@ -84,6 +84,10 @@ client.on('message', async msg => {
 						;
 						sql.botQuery("SELECT * FROM fowl_quotes ORDER BY RAND() LIMIT 1",sayQuote,msg);
 						;
+					}
+					if(chat.includes(config.prefix+"pronouns"))
+					{
+						pronoun(msg);
 					}
 
 					//lquote command
@@ -162,7 +166,6 @@ client.on('message', async msg => {
 					let sql = require("./sql.js")
 					now = Date.now();
 					sql.debug = debug;
-					;
 					sql.run(
 						"INSERT INTO egg_messages (message_content,user_tag,user_id,timestamp,message_sent,channel_name) VALUES(?,?,?,?,?,?)",
 						[
@@ -255,6 +258,9 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 			if(channelID==config.movie_channel||channelID==config.after_movie)
 			{
 				newMember.roles.add(config.audience);
+			} else if(channelID==config.music.channel)
+			{
+				newMember.roles.add(config.music.role);
 			}
 
 		}
@@ -266,6 +272,9 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 			if(channelID==config.movie_channel||channelID==config.after_movie)
 			{
 				oldMember.roles.remove(config.audience);
+			}else if(channelID==config.music.channel)
+			{
+				oldMember.roles.remove(config.music.role);
 			}
 
 		}
@@ -821,6 +830,97 @@ function makeRank(msg,rows)
 		files: ["http://chickenbot.xyz/scorecard/x"+msg.author.id+".png"]
 	});
 }
+
+
+
+function pronoun(msg)
+{
+	command = msg.chat;
+	params =chat.split(' ');
+	action = params[1];
+	pronoun_ = params[2];
+	if(pronoun_!=undefined)
+	{
+		pronoun_ = pronoun_.toLowerCase();
+	}
+	if(action==undefined)
+	{
+		action="list";
+	}
+
+	console.log(action+" - "+pronoun_);
+
+	if(action=="list")
+	{
+		output = "**Please select your pronouns from the blow list**:\n";
+		pronouns = config.pronouns;
+		for(i=0;i<pronouns.length;i++)
+		{
+			output+= ""+pronouns[i]["short-name"]+" - <@&"+pronouns[i]["role-id"]+">\n";
+
+		}
+		output+="To add/remove a pronoun to your roles please type !pronouns <add/remove> then the name of the pronoun as it appears above";
+		msg.channel.send(output);
+		console.log(output);
+
+	}
+	else if(action=="add")
+	{
+
+		pronouns = config.pronouns;
+		role = 0
+		for(i=0;i<pronouns.length;i++)
+		{
+			if(pronouns[i]["short-name"].toLowerCase()==pronoun_)
+			{
+				role=pronouns[i]["role-id"];
+				break;
+			}
+
+
+		}
+		if(role==0)
+		{
+			msg.reply("Sorry, I couldn't find that. Please make sure you are spelling it correctly");
+		}
+		else
+		{
+			msg.member.roles.add(role);
+			msg.reply("I have added this pronoun to you :)");
+		}
+	}
+	else if(action=="remove")
+	{
+
+		pronouns = config.pronouns;
+		role = 0
+		for(i=0;i<pronouns.length;i++)
+		{
+			if(pronouns[i]["short-name"].toLowerCase()==pronoun_)
+			{
+				role=pronouns[i]["role-id"];
+				break;
+			}
+
+
+		}
+		if(role==0)
+		{
+			msg.reply("Sorry, I couldn't find that. Please make sure you are spelling it correctly");
+		}
+		else
+		{
+			msg.member.roles.remove(role);
+			msg.reply("I have removed this pronoun from you :)");
+		}
+	}
+	else if(action=="clear")
+	{
+
+	}
+}
+
+
 
 
 /***********************
