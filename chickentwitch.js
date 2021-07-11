@@ -206,8 +206,19 @@ async function guess(killer,user)
 	let sql = require("./sql.js");
 	user_id = await twitch.getIdFromUsername(user);
 	console.log(`${user}(${user_id}) has guessed ${killer}`);
+	if(killer.toLowerCase()=="nea")
+	{
+		client.say("#"+channel_name,`/timeout ${user} 10`);
+		client.say("#"+channel_name,`@${user} that joke was so funny that I accidentally timed you out`);
+		return;
+	}
 	query = "SELECT * from killer_names WHERE killername LIKE ? OR aliases LIKE ?";
 	results = await sql.syncQuery(query,["%"+killer+"%","%"+killer+"%"]);
+	if(results.length==0)
+	{
+		client.say("#"+channel_name, `@${user} I could not find "${killer}"`);
+		return;
+	}
 	confirmed = results[0].killername;
 
 	//get id of current prediction
