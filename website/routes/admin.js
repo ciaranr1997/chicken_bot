@@ -53,7 +53,7 @@ router.get('/bingo',(req,res)=>{
 		html = html.replace("${site.nav}",nav);
 		html = html.replace("${user.image}",req.user.image);
 		optionArea = "<div class=\"cardArea\"><table class=\"cards\">";
-		optionArea+="<tr><th>Text</th><th>Difficulty</th><th>Actions</th>"
+		optionArea+="<tr><th>Text</th><th>Difficulty</th><th>Actions</th></tr>"
 		let sql = require("../../sql.js");
 		;
 		is_active = await sql.syncQuery("select setting_value from bingo_settings where setting=\"is_active\"");
@@ -98,9 +98,23 @@ router.get('/bingo',(req,res)=>{
 
 
 const config = require("../../config.json");
-const Discord = require('discord.js');
-const client = new Discord.Client();
+const { Discord, Intents, Client, MessageCollector} = require('discord.js');
+const myIntents = new Intents();
+myIntents.add(
+	Intents.FLAGS.GUILDS,
+	Intents.FLAGS.GUILD_BANS,
+	Intents.FLAGS.GUILD_INVITES,
+	Intents.FLAGS.GUILD_VOICE_STATES,
+	Intents.FLAGS.GUILD_MESSAGES,
+	Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+	Intents.FLAGS.DIRECT_MESSAGES
+);
+
+const client = new Client({ intents: myIntents, partials:["MESSAGE","REACTION","CHANNEL","USER"] });
+
+
 client.login(config.token);
+
 router.get('/bingo/cards',(req,res)=>{
 
 
@@ -129,7 +143,7 @@ router.get('/bingo/cards',(req,res)=>{
 			{
 				myUser = await client.users.fetch(userCard[0].user_id);
 				userName = myUser.username+"#"+myUser.discriminator
-				cards+="<p class=\"user-title\">"+userName+" ($TOTAL)</p>";
+				cards+="<p class=\"user-title\">"+userName+" ($TOTAL) ["+userCard.created+"]</p>";
 				cards+="<div class=\"board\">"
 				all = JSON.parse(userCard[0].card_data);
 				total=0;
@@ -186,7 +200,7 @@ router.get('/bingo/cards',(req,res)=>{
 					card_data = JSON.parse(card.card_data);
 					myUser = await client.users.fetch(card.user_id);
 					userName = myUser.username+"#"+myUser.discriminator
-					userCard+="<p class=\"user-title\">"+userName+" ($TOTAL)</p>";
+					userCard+="<p class=\"user-title\">"+userName+" ($TOTAL) ["+card.created+"]</p>";
 					userCard+="<div class=\"board\">"
 					for(i=0; i<card_data.length;i++)
 					{
@@ -239,8 +253,207 @@ router.get('/bingo/cards',(req,res)=>{
 		html = html.replace("${user.image}",req.user.image);
 		res.writeHead(200, {'Content-Type': 'text/html'});
 		res.end(html);
-		;
+
 	});
 });
+
+router.get('/twitch',(req,res)=>{
+	nav = fs.readFileSync("pageparts/nav.html").toString();
+	header = fs.readFileSync("pageparts/header.html").toString();
+
+	fs.readFile('html/admin/twitch.html', async (e, data) => {
+
+		html = data.toString();
+		html = html.replace("${site.header}",header);
+		html = html.replace("${site.nav}",nav);
+		html = html.replace("${user.image}",req.user.image);
+
+		res.writeHead(200, {'Content-Type': 'text/html'});
+		res.end(html);
+	});
+});
+
+
+
+
+
+router.get('/redemptions',(req,res)=>{
+	nav = fs.readFileSync("pageparts/nav.html").toString();
+	header = fs.readFileSync("pageparts/header.html").toString();
+	fs.readFile('html/admin/redemptionman.html', async (e, data) => {
+
+		html = data.toString();
+		html = html.replace("${site.header}",header);
+		html = html.replace("${site.nav}",nav);
+		html = html.replace("${user.image}",req.user.image);
+		redemptionArea = "<div class=\"redemptionArea\"><table class=\"redemptions\">";
+		redemptionArea+="<tr><th>Redemption Name</th><th>Description</th><th>Cost</th><th>Video URL</th><th>Image URL</th><th>Audio URL</th><th>Allow Text?</th><th>Allow TTS?</th><th>Actions</th></tr>"
+		let sql = require("../../sql.js");
+
+
+		redemptions = await sql.syncQuery("select * from fowl_redemptions WHERE isdeleted=0 ORDER BY isenabled DESC, redemption_name ASC ");
+		redemptions.forEach((redemption, i) => {
+			redemptionArea+="<tr id=\"row-"+redemption.id+"\"class=\"option"
+			if(redemption.isenabled==0) redemptionArea +=" disabled";
+			redemptionArea+="\">";
+			redemptionArea+="<td><span class=\"redemptionName\">"+redemption.redemption_name+"</span></td>";
+			redemptionArea+="<td><span class=\"redemptionDescription\">"+redemption.redemption_description+"</span></td>";
+			redemptionArea+="<td><span class=\"redemptionCost\">"+redemption.cost+"</span></td>";
+			redemptionArea+="<td><span class=\"redemptionVideo\">"+redemption.videourl+"</span></td>";
+			redemptionArea+="<td><span class=\"redemptionImage\">"+redemption.imageurl+"</span></td>";
+			redemptionArea+="<td><span class=\"redemptionaudio\">"+redemption.audiourl+"</span></td>";
+			var txt = "";
+			if(redemption.hastext==1)
+			{
+				txt="yes";
+			}
+			else
+			{
+				txt="no";
+			}
+			var tts = "";
+			if(redemption.allowtts==1)
+			{
+				tts="yes";
+			}
+			else
+			{
+				tts="no";
+			}
+			redemptionArea+="<td><span class=\"redemptionText\">"+txt+"</span></td>";
+			redemptionArea+="<td><span class=\"redemptionTts\">"+tts+"</span></td>";
+
+			redemptionArea+="<td><button class=\"edit\" id=\"edit-"+redemption.id+"\">Edit</button>";
+			redemptionArea+="<button class=\"disable\" id=\"disable-"+redemption.id+"\">Disable</button><button class=\"enable\" id=\"enable-"+redemption.id+"\">Enable</button><button class=\"delete\" id=\"delete-"+redemption.id+"\">Delete</button>";
+
+			redemptionArea+="</td>";
+			redemptionArea+="</tr>";
+		});
+		redemptionArea+="</table></div>";
+
+		html = html.replace("${admin.redemptions}",redemptionArea);
+		res.writeHead(200, {'Content-Type': 'text/html'});
+		res.end(html);
+
+	});
+});
+
+router.get('/redemptionqueue',(req,res)=>{
+	nav = fs.readFileSync("pageparts/nav.html").toString();
+	header = fs.readFileSync("pageparts/header.html").toString();
+	fs.readFile('html/admin/extension.html', async (e, data) => {
+		let sql = require("../../sql.js");
+
+		queueQuery = "SELECT fowl_redemptions.redemption_name, redemption_queue.username, redemption_queue.timestamp, redemption_queue.text FROM redemption_queue INNER JOIN fowl_redemptions ON redemption_queue.redemptionid = fowl_redemptions.id ORDER by redemption_queue.id DESC LIMIT 25;";
+		queueArr = await sql.syncQuery(queueQuery);
+		html = data.toString();
+		html = html.replace("${site.header}",header);
+		html = html.replace("${site.nav}",nav);
+		html = html.replace("${user.image}",req.user.image);
+		var recentRedemptions = "<table class='redemptionList'>";
+		recentRedemptions+="<tr><th>Redemption Name</th><th>userName</th><th>Redemption Text</th><th>Redemption Time</th>";
+		for(i=0;i<queueArr.length;i++)
+		{
+			var newDate = new Date(parseInt(queueArr[i]["timestamp"]));
+			var hh = newDate.getHours();
+			var mm = newDate.getMinutes();
+			if(hh<10)
+			{
+				hh= "0"+hh;
+			}
+			if(mm<10)
+			{
+				mm= "0"+mm;
+			}
+			var redemptionDate = hh + ":" + mm +" " +newDate.getDate()+"/"+(newDate.getMonth()+1)+"/"+newDate.getFullYear();
+
+			recentRedemptions+="<tr><td>"+queueArr[i]["redemption_name"]+"</td><td>"+queueArr[i]["username"]+"</td><td>"+queueArr[i]["text"]+"</td><td>"+redemptionDate+"</td></tr>"
+
+		}
+		recentRedemptions+="</table>"
+		html = html.replace("${admin.extension.redemptions}",recentRedemptions);
+
+		res.writeHead(200, {'Content-Type': 'text/html'});
+		res.end(html);
+	});
+});
+router.get('/upload',(req,res)=>{
+	header = fs.readFileSync("pageparts/header.html").toString();
+	fs.readFile('html/admin/fileupload.html', async (e, data) => {
+
+		html = data.toString();
+		html = html.replace("${site.header}",header);
+
+
+		res.writeHead(200, {'Content-Type': 'text/html'});
+		res.end(html);
+	});
+});
+
+router.get('/loyaltypoints',(req,res)=>{
+	nav = fs.readFileSync("pageparts/nav.html").toString();
+	header = fs.readFileSync("pageparts/header.html").toString();
+	fs.readFile('html/admin/loyalty.html', async (e, data) => {
+
+		html = data.toString();
+		html = html.replace("${site.header}",header);
+		html = html.replace("${site.nav}",nav);
+		html = html.replace("${user.image}",req.user.image);
+		loyaltyTable = "<div class=\"pointContainer\"><table class=\"points tablesorter\">";
+		loyaltyTable+="<thead><tr><th>User ID</th><th>Username</th><th>Points</th>"
+		if(req.user.id =="267071563285659659" ||req.user.id =="187262396237217792" )
+		{
+			loyaltyTable += "<th>Actions</th>";
+		}
+		loyaltyTable+= "</tr></thead><tbody>"
+		let sql = require("../../sql.js");
+		var twitch = require("../../twitch.js");
+		var util = require("../../utils.js");
+		rows = await sql.syncQuery("select fowl_loyalty.user_id,fowl_loyalty.points from fowl_loyalty order by points DESC");
+
+		idarr = [];
+
+		for(i=0;i<rows.length;i++)
+		{
+			idarr.push(rows[i].user_id);
+		}
+		user_details = await twitch.getUserDetailsBulk(idarr);
+		for(i=0;i<user_details.length;i++)
+		{
+			index = utils.keySearch(user_details[i].id, rows,"user_id");
+			if(index>=0)
+			{
+				rows[index].user_details=user_details[i];
+			}
+		}
+		for(i=0;i<rows.length;i++)
+		{
+			if(rows[i].user_details==undefined)
+			{
+				username=rows[i].user_id;
+			}
+			else
+			{
+				username = rows[i].user_details.display_name;
+			}
+			loyaltyTable+="<tr>";
+			loyaltyTable+="<td>"+rows[i].user_id+"</td>";
+			loyaltyTable+="<td>"+username+"</td>";
+			loyaltyTable+="<td id='points-"+rows[i].user_id+"'>"+rows[i].points+"</td>";
+			if(req.user.id =="267071563285659659" ||req.user.id =="187262396237217792" )
+			{
+				loyaltyTable += "<td><button style='width:100px;' class='btnAdd' id='addPnts-"+rows[i].user_id+"'>Add points:</button><input type='number' style='width:80px;' id='addInput-"+rows[i].user_id+"' style='width:80px'><br/><button style='width:100px;' class='setBtn' id='setPnts-"+rows[i].user_id+"'>Set points:</button><input type='number' id='setInput-"+rows[i].user_id+"' style='width:80px'></td>";
+			}
+			loyaltyTable+="</tr>";
+		}
+		loyaltyTable+="</tbody></table>";
+
+		html = html.replace("${admin.loyalty}",loyaltyTable);
+		res.writeHead(200, {'Content-Type': 'text/html'});
+		res.end(html);
+
+	});
+});
+
 
 module.exports = router;

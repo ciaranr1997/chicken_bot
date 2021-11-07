@@ -5,10 +5,12 @@ var isLive = false;
 const axios = require('axios').default;
 var usersInChat = 0;
 var userArray = [];
+var userMinute =[];
 const util = require('./utils');
 const channel_name = config.twitch.channel_name;
 const cooldowns = new Set();
 var winnerMsg = "No winners so far";
+var seconds = 0;
 // Define configuration options
 const opts = {
   identity: {
@@ -36,7 +38,7 @@ async function onMessageHandler (target, context, msg, self) {
 	let sql = require("./sql.js");
 	parts = msg.split(' ');
   // Remove whitespace from chat message
-  const commandName = parts[0];
+  const commandName = parts[0].toLowerCase();
   // If the command is known, let's execute it
   if (commandName === '!watchtime') {
 		if(parts.length>1)
@@ -105,6 +107,33 @@ async function onMessageHandler (target, context, msg, self) {
 	{
 		client.say(target, `${winnerMsg}`);
 	}
+	else if(commandName=="!game")
+	{
+		//if(!isLive) return;
+		var fowlDets = await twitch.getFowlDetails();
+
+		var game = fowlDets[0].game_name;
+
+		client.say(target, `Fowl is currently playing "${game}"`);
+	}
+	else if(commandName=="!hours")
+	{
+		getHours();
+	}
+	else if(commandName=="!escapes")
+	{
+		getDbdStats("DBD_Escape");
+	} else if(commandName=="!skillchecks")
+	{
+		getDbdStats("DBD_SkillCheckSuccess");
+	} else if(commandName=="!kills")
+	{
+		getDbdStats("DBD_SacrificedCampers");
+	} else if(commandName=="!roll20")
+	{
+		var dice = Math.round(Math.random() * (20 - 1) + 1);
+		client.say(target, `You rolled a ${dice}!`);
+	}
 
 	user_id = await twitch.getIdFromUsername(context.username);
 	isBot = await twitch.checkBot(user_id);
@@ -134,11 +163,13 @@ async function onConnectedHandler (addr, port) {
 	usersNow = createUserArray(usersInChatData.chatters);
 	userArray = usersNow;
 
+
 }
 
 async function minuteChecks()
 {
 	isLive = await twitch.checkLive(channel_name);
+
 	if(isLive)
 	{
 		usersInChatData = await twitch.getUsersInChat();
@@ -148,12 +179,45 @@ async function minuteChecks()
 		usersStayed = compareUsers(userArray,usersNow);
 		addwatchtime(usersStayed);
 		userArray = usersNow;
+		seconds = seconds+10;
+		if(seconds==60)
+		{
+			seconds = 0;
+			usersStayedMin = compareUsers(userMinute,usersNow);
+			addCurrency(usersStayedMin);
+			userMinute = usersNow;
 
-
+		}
+	}
+	else
+	{
+		seconds = 0;
 	}
 
 }
 
+async function addCurrency(users)
+{
+	// check how much currency to get per minute first
+	userIds = await twitch.getIdFromUsernameBulk(users);
+
+	let sql = require("./sql.js");
+	var loyaltyQuery = "SELECT * FROM loyalty_settings where setting_key='watchtime'";
+	rows = await sql.syncQuery(loyaltyQuery);
+	upBy = rows[0].value;
+	for(i=0;i<userIds.length;i++)
+	{
+		user_id=userIds[i];
+		isBot = await twitch.checkBot(user_id);
+		if(!isBot)
+		{
+			query = "INSERT INTO  fowl_loyalty (user_id,points) VALUES(\""+user_id+"\","+upBy+") ON DUPLICATE KEY UPDATE points=points+"+upBy;
+			sql.run(
+				query
+			);
+		}
+	}
+}
 
 function createUserArray(chatters)
 {
@@ -186,12 +250,13 @@ async function addwatchtime(users)
 	userIds = await twitch.getIdFromUsernameBulk(users);
 	for(i=0;i<userIds.length;i++)
 	{
+		var upBy = 10;
 		user_id=userIds[i];
 		let sql = require("./sql.js");
 		isBot = await twitch.checkBot(user_id);
 		if(!isBot)
 		{
-			query = "INSERT INTO  twitch_watchtime (user_id,timer) VALUES(\""+user_id+"\",10) ON DUPLICATE KEY UPDATE timer=timer+10";
+			query = "INSERT INTO  twitch_watchtime (user_id,timer) VALUES(\""+user_id+"\","+upBy+") ON DUPLICATE KEY UPDATE timer=timer+"+upBy;
 			sql.run(
 				query
 			);
@@ -203,6 +268,19 @@ async function addwatchtime(users)
 
 async function guess(killer,user)
 {
+	if(!isLive)
+	{
+		client.say("#"+channel_name, `Fowl is not currently live.`);
+		return;
+	}
+	var fowlDets = await twitch.getFowlDetails();
+	var game = "Dead by Daylight"//fowlDets[0].game_name;
+
+	if(game!="Dead by Daylight")
+	{
+		client.say("#"+channel_name, `Fowl is currently playing "${game}" which is NOT Dead By Daylight. Why are you trying to guess the killer?`);
+		return;
+	}
 	let sql = require("./sql.js");
 	user_id = await twitch.getIdFromUsername(user);
 	console.log(`${user}(${user_id}) has guessed ${killer}`);
@@ -279,9 +357,16 @@ async function confirmKiller(killer)
 	{
 		console.log(winners);
 		winmsg = "Winners are: ";
+		var upBy = 250;
 		for(i=0;i<winners.length;i++)
 		{
 			winmsg+= winners[i].user_nick+" ";
+			var givePoints = "";
+			var query2 = "INSERT INTO  fowl_loyalty (user_id,points) VALUES(\""+winners[i].user_predicted+"\","+upBy+") ON DUPLICATE KEY UPDATE points=points+"+upBy;
+			console.log(query2);
+			sql.run(
+				query2
+			);
 		}
 		winnerMsg = winmsg;
 		client.say("#"+channel_name,winmsg);
@@ -291,4 +376,50 @@ async function confirmKiller(killer)
 function guessInform()
 {
 	client.say("#"+channel_name,"Get your new killer guesses in now with !guess!");
+}
+
+
+async function getHours()
+{
+	res = await axios.get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key="+config.steam.api_key+"&steamid=76561198046010977");
+	games = res.data.response.games;
+	hours = 0;
+	for (i=0;i<games.length; i++)
+	{ if (games[i].appid==381210)
+		{
+			hours = Math.round(games[i].playtime_forever/60)
+			break;
+		}
+	}
+	client.say("#"+channel_name,"Fowl has "+hours+" hours played in dead by daylight");
+
+}
+async function getDbdStats(statName)
+{
+	res = await axios.get("https://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v2/?key="+config.steam.api_key+"&steamid=76561198046010977&appid=381210");
+	stats = res.data.playerstats.stats;
+	statVal="";
+	for(i=0;i<stats.length;i++)
+	{
+		if(stats[i].name==statName)
+		{
+			statVal=stats[i].value;
+			break;
+		}
+	}
+	switch(statName)
+	{
+		case "DBD_Escape":
+			client.say("#"+channel_name,"Fowl has "+statVal+" escapes in dead by daylight");
+		break;
+		case "DBD_SkillCheckSuccess":
+			client.say("#"+channel_name,"Fowl has hit "+statVal+" skillchecks in dead by daylight. He has missed "+(statVal*3)+" LUL");
+		break;
+		case "DBD_SacrificedCampers":
+			client.say("#"+channel_name,"Fowl has sacrificed "+statVal+" survivors in dead by daylight");
+		break;
+		default:
+
+		break;
+	}
 }

@@ -1,0 +1,78 @@
+<html>
+	<head>
+		${site.header}
+		<link rel="stylesheet" href="/static/plugins/tablesorter/css/theme.default.min.css">
+		<script src="/static/plugins/tablesorter/js/jquery.tablesorter.min.js"></script>
+		<script src="/static/plugins/tablesorter/js/jquery.tablesorter.widgets.min.js"></script>
+		<script src="/static/plugins/tablesorter/js/widgets/widget-pager.min.js"></script>
+		<script src="/static/js/loyalty.js"></script>
+		<link rel="stylesheet" href="/static/css/loyalty.css">
+		<title>Coop Loyalty!</title>
+	</head>
+	<body>
+		${site.nav}
+		${admin.loyalty}
+		<div id="pager" class="pager">
+<form>
+	<img src="/static/images/first.png" class="first"/>
+	<img src="/static/images/left.png" class="prev"/>
+	<!-- the "pagedisplay" can be any element, including an input -->
+	<span class="pagedisplay" data-pager-output-filtered="{startRow:input} &ndash; {endRow} / {filteredRows} of {totalRows} total rows"></span>
+	<img src="/static/images/right.png" class="next"/>
+	<img src="/static/images/last.png" class="last"/>
+	<select class="pagesize">
+		<option value="10">10</option>
+		<option value="20">20</option>
+		<option value="50">50</option>
+		<option value="all">All Rows</option>
+	</select>
+</form>
+<script>
+	$("body").on("click",".btnAdd",function()
+	{
+
+		var user_id = $(this).attr("id").replace("addPnts-",'');
+		var addVal = $("#addInput-"+user_id).val();
+		if(addVal==null||addVal=="") return;
+		$.ajax({
+				 url: "/requests/loyalty_admin/add",
+				 method: "POST",
+				 data: { user_id: user_id, addBal: addVal}
+		 }).then(function(data) {
+				if(data.success)
+				{
+					$('input').val("");
+					$("#points-"+user_id).text(data.newBal);
+				}
+				else if (data.error)
+				{
+						alert("There has been an error doing this. Please refresh the page and try again :(\n\n"+data.error);
+				}
+		 });
+
+	});
+	$("body").on("click",".setBtn",function()
+	{
+		var user_id = $(this).attr("id").replace("setPnts-",'');
+		var setVal = $("#setInput-"+user_id).val();
+		if(setVal==null||setVal=="") return;
+		$.ajax({
+				 url: "/requests/loyalty_admin/set",
+				 method: "POST",
+				 data: { user_id: user_id, setBal: setVal}
+		 }).then(function(data) {
+				if(data.success)
+				{
+						$('input').val("");
+						$("#points-"+user_id).text(data.newBal);
+				}
+				else if (data.error)
+				{
+						alert("There has been an error doing this. Please refresh the page and try again :(\n\n"+data.error);
+				}
+		 });
+
+	});
+	</script>
+	</body>
+</html>

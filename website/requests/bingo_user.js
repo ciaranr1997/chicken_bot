@@ -13,6 +13,8 @@ admin =
 	},
 	run:async function()
 	{
+		var io = this.req.app.get("socketio");
+
 		if(!this.req.user)
 		{
 			this.error("You are not currently logged in");
@@ -20,7 +22,7 @@ admin =
 		}
 		id = body.id;
 		let sql = require("../../sql.js");
-		;
+
 		if(params[1]=="check")
 		{
 			checked = await sql.syncQuery("select is_called from bingo_options where id='"+id+"'");
@@ -31,9 +33,11 @@ admin =
 				this.res.end('{"error":"Denied"}');
 				return;
 			}
+		} else if(params[1]=="bingo")
+		{
+			io.of("/bingosocket").emit("bingo",{"user":this.req.user.username,"type":body.type});
 		}
 
-		;
 		this.end();
 
 	},

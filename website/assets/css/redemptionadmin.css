@@ -1,0 +1,235 @@
+
+/*******************REdemption Areas*******************/
+.btn-area
+{
+	margin-top:20px;
+}
+.open,.reset
+{
+	color:white;
+	background-color: red;
+	border: 1px solid #ff4545;
+	margin-left: 20px;
+	border-radius: 20px;
+	font-size: 30px;
+}
+.open:hover,.reset:hover
+{
+	background-color: #fe6464;
+}
+.closed
+{
+	color:white;
+	background-color: #58b957;
+	border: 1px solid #58b957;
+	margin-left: 20px;
+	border-radius: 20px;
+	font-size: 30px;
+}
+.closed:hover
+{
+	background-color: #5ecc5e;
+}
+.redemptionArea
+{
+	margin-top:20px;
+	min-width: 80%;
+	width:80%;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom:50px;
+	padding-bottom:20px;
+}
+.redemptionArea .redemptions
+{
+	background-color: #18191c;
+	padding-top: 20px;
+  padding-bottom: 20px;
+	height: auto;
+	max-height: 80%;
+	overflow-y: scroll;
+	width:100%;
+	border:1px solid white;
+	border-collapse: collapse;
+}
+.redemptionArea .redemptions li
+{
+	background-color: black;
+	border:2px solid #18191c;
+	color:white;
+	margin-top:10px;
+	width:80%;
+	margin-left: auto;
+	margin-right: auto;
+	height:auto;
+	border-radius: 10px;
+	padding:20px;
+}
+.redemptionArea .redemptions th
+{
+	border:1px solid white;
+	font-size: 30px;
+}
+.redemptionArea .redemptions td
+{
+	border:1px dotted white;
+}
+.redemptionArea .option
+{
+	font-style: italic;
+	margin-left:20px;
+}
+
+.redemptionArea .edit, .redemptionArea .disable, .delete
+{
+	color:white;
+	background-color: red;
+	border: 1px solid #ff4545;
+	margin-left: 20px; border-radius: 20px;
+}
+.redemptionArea .edit:hover, .redemptionArea .disable:hover
+{
+	background-color: #fe6464;
+}
+.redemptionArea th
+{
+	font-weight: bolder;
+}
+.redemptionArea td
+{
+	font-weight: normal;
+	font-style: normal;
+	width:auto;
+	padding-left: 20px;
+	padding-right: 20px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+.redemptionArea .save, .redemptionArea .enable,
+{
+	color:white;
+	background-color: #58b957;
+	border: 1px solid #58b957;
+	margin-left: 20px; border-radius: 20px;
+	display:none;
+}
+#addNew,#fileUpload
+{
+	color:white;
+	background-color: #58b957;
+	border: 1px solid #58b957;
+	margin-left: 20px; border-radius: 20px;
+	font-size: 20px;
+}
+.redemptionArea .save:hover, .redemptionArea .enable:hover, #addNew:hover, #new-save:hover, #fileUpload:hover
+{
+	background-color: #5ecc5e;
+}
+
+
+.redemptionArea .enable
+{
+	display:none;
+}
+.redemptionArea tr.disabled
+{
+	background-color: #2f2c2d;
+	color:#ccc;
+}
+.redemptionArea tr.disabled .enable
+{
+	display:inline-block;
+}
+.redemptionArea tr.disabled .disable
+{
+	display:none;
+}
+.add-new
+{
+	display:block;
+	position:fixed;
+ 	top: 123px;
+	width:50%;
+	margin-left: 25%;
+	margin-right: auto;
+	border:1px solid white;
+	background-color:#0e0e10;
+	color:white;
+	border-radius:5px;
+	padding:10px;
+
+}
+.add-new h2
+{
+	border-bottom: 1px dotted white;
+	font-size:30px;
+}
+.add-new *
+{
+	display:block;
+	margin: auto;
+	width:80%;
+}
+#new-cancel
+{
+	background-color: inherit;
+	color:red;
+	text-decoration: underline;
+	border:none;
+}
+#new-save
+{
+	color:white;
+	background-color: #58b957;
+	border: 1px solid #58b957;
+	margin:auto;
+}
+#new-description
+{
+	height:100px;
+}
+/* EDIT */
+.edit-panel
+{
+	display:block;
+	position:fixed;
+ 	top: 123px;
+	width:50%;
+	margin-left: 25%;
+	margin-right: auto;
+	border:1px solid white;
+	background-color:#0e0e10;
+	color:white;
+	border-radius:5px;
+	padding:10px;
+
+}
+.edit-panel h2
+{
+	border-bottom: 1px dotted white;
+	font-size:30px;
+}
+.edit-panel *
+{
+	display:block;
+	margin: auto;
+	width:80%;
+}
+#edit-cancel
+{
+	background-color: inherit;
+	color:red;
+	text-decoration: underline;
+	border:none;
+}
+#edit-save
+{
+	color:white;
+	background-color: #58b957;
+	border: 1px solid #58b957;
+	margin:auto;
+}
+#edit-description
+{
+	height:100px;
+}

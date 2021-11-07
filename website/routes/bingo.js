@@ -37,7 +37,9 @@ router.get('/',(req,res)=>{
 				all = all.concat(hardrows);
 				shuffle(all);
 				cardData = JSON.stringify(all);
-				sql.run("INSERT INTO bingo_cards (user_id,card_data,is_active) VALUES(?,?,1)",[req.user.id,cardData]);
+				var date = new Date;
+				var timeCreated =  date.getHours()+":"+date.getMinutes();
+				sql.run("INSERT INTO bingo_cards (user_id,card_data,is_active,created) VALUES(?,?,1,?)",[req.user.id,cardData,timeCreated]);
 
 			}
 			else

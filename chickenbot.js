@@ -1,8 +1,21 @@
 /***********************
 ******SETUP STUFF*******
 ***********************/
-const Discord = require('discord.js');
-const client = new Discord.Client();
+//channel =
+//channel =
+const { Discord, Intents, Client, MessageCollector} = require('discord.js');
+const myIntents = new Intents();
+myIntents.add(
+	Intents.FLAGS.GUILDS,
+	Intents.FLAGS.GUILD_BANS,
+	Intents.FLAGS.GUILD_INVITES,
+	Intents.FLAGS.GUILD_VOICE_STATES,
+	Intents.FLAGS.GUILD_MESSAGES,
+	Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+	Intents.FLAGS.DIRECT_MESSAGES
+);
+
+const client = new Client({ intents: myIntents, partials:["MESSAGE","REACTION","CHANNEL","USER"] });
 const config = require("./config.json");
 const recentCommand = new Set();
 const recentTalker = new Set();
@@ -19,7 +32,7 @@ client.login(config.token);
 ***********************/
 
 //discord client has recieved a message event
-client.on('message', async msg => {
+client.on('messageCreate', async msg => {
 	if(!msg.author.bot)
 	{
 		if(msg.guild==null)
@@ -141,7 +154,14 @@ client.on('message', async msg => {
 					{
 						addQuote(msg);
 					}
-
+					if(chat.includes(config.prefix+"request"))
+					{
+						var req = chat.replace(config.prefix+"request ","");
+						var out = "**Feature request from "+msg.author.tag + " at "+new Date(msg.createdTimestamp) + "**:\n\n"+req;
+						var reqC = client.channels.cache.get("906549935732838430");
+						reqC.send(out);
+						msg.reply("Thank you for your suggestion! This has been logged for consideration :)");
+					}
 					//manage timeout
 					recentCommand.add(msg.author.id);
         	setTimeout(() => {
@@ -214,6 +234,10 @@ client.on("messageDelete", async function (messageDelete) {
 
 ///log message edits
 client.on('messageUpdate', (oldMessage, newMessage) => {
+	if(oldMessage==null) return;
+	console.log(oldMessage);
+	console.log(newMessage);
+
 	if(oldMessage.author.bot)
 	{
 		return false;
@@ -237,6 +261,13 @@ client.on('messageUpdate', (oldMessage, newMessage) => {
 	;
 });
 
+
+client.on('threadCreate', async thread => {
+
+		await thread.join();
+		await thread.send("Bawk");
+		console.log(`Created thread: ${thread.name}`);
+});
 
 /// This managed the voice roles for users
 /// Who join the movie channels
@@ -312,7 +343,7 @@ client.on('ready', () => {
 	debug = client.channels.cache.get(config.debug_channel);
 	movieAnnounce = client.channels.cache.get(config.movie_announce);
 	//client.user.setPresence({activity:{ name: 'Watching over the coop. '+config.prefix+'fhelp' }, status: 'available'});
-	client.user.setActivity('Watching over the coop. '+config.prefix+'fhelp');
+	client.user.setActivity('over the coop. '+config.prefix+'fhelp',{ type: 'WATCHING' });
 	debug.send("I'm awake!");
 	var d = new Date();
 	var n = d.getMinutes();
@@ -331,11 +362,10 @@ client.on('ready', () => {
 function schedule(movieparams,msg)
 {
 	let resp = msg.reply("When would you like to schedule a movie night?").then(sent => { // 'sent' is that message you just sent
-		const collector = new Discord.MessageCollector(msg.channel, m => m.author.id === msg.author.id, { time: 30000 });
+		const collector = new MessageCollector(msg.channel, m => m.author.id === msg.author.id, { time: 30000 });
 		collector.on('collect', message => {
 			const startdate = Date.parse(message)/1000;
 			announcement = {
-				"embed": {
 					"title": movieparams.title,
 					"description": "Join the coop in a movie night to watch \n**"+movieparams.title+"**",
 					"url": "https://www.themoviedb.org/movie/"+movieparams.id,
@@ -346,23 +376,22 @@ function schedule(movieparams,msg)
 					"fields": [
 						{
 							"name": "Start Time",
-							"value": message
+							"value": message.content
 						},
 						{
 							"name": "Host",
-							"value": msg.author
+							"value": msg.author.tag
 						},
 						{
 							"name": "Overview",
 							"value": movieparams.overview
 						},
 					]
-				}
 			}
 			collector.stop();
 			if(movieparams.runtime!=null)
 			{
-				announcement.embed.fields.push(
+				announcement.fields.push(
 					{
 						"name": "Runtime",
 						"value": movieparams.runtime+" minutes"
@@ -370,17 +399,20 @@ function schedule(movieparams,msg)
 				}
 				if(movieparams.trailer!=null)
 				{
-					announcement.embed.fields.push(
+					announcement.fields.push(
 						{
 							"name": "Trailer",
 							"value": movieparams.trailer
 						});
 					}
-
-					movieAnnounce.send(announcement);
-					message.delete();
-					msg.delete();
-					sent.delete();
+					console.log(announcement);
+					movieAnnounce.send({embeds:[announcement]});
+					try
+					{
+						message.delete().catch();
+						msg.delete().catch();
+						sent.delete().catch();
+					} catch{}
 					/******* Input Schedule******/
 					/*let sql = require("./sql.js")
 					sql.debug = debug;
@@ -414,7 +446,7 @@ function returnMovies(data,msg)
 			}
 			response+="\nIf the movie you have requested does not show type _'cancel'_ and try again with a more specific query";
 			msg.reply(response).then(sent => { // 'sent' is that message you just sent
-				const collector = new Discord.MessageCollector(msg.channel, m => m.author.id === msg.author.id, { time: 30000 });
+				const collector = new MessageCollector(msg.channel, m => m.author.id === msg.author.id, { time: 30000 });
 
 				collector.on('collect', message => {
 					if(!message.content.includes("cancel"))
@@ -425,8 +457,11 @@ function returnMovies(data,msg)
 					{
 						msg.reply("Okay :)");
 					}
-					sent.delete();
-					message.delete();
+					sent.delete().catch();;
+					try
+					{
+						message.delete().catch();;
+					} catch{}
 					collector.stop();
 				})
 			});
@@ -621,13 +656,14 @@ async function addQuote(msg)
 	if(!men) return;
 	mention = client.users.fetch(men);
 	messages = await msg.channel.messages.fetch(mention.lastMessageID);
-	messages = messages.array();
+	messages = Array.from(messages.values());
+
 	output = "Please select the quote from the below list\n";
 	u=0;
 	options = ["_"];//dummy null entry to make life easier for the user
 	for(i=0;i<messages.length;i++)
 	{
-
+		console.log(messages[i]);
 		if(messages[i].author.id==men)
 		{
 			u++;
@@ -646,7 +682,7 @@ async function addQuote(msg)
 	}
 	output+="type 'cancel' to stop";
 	msg.reply(output).then(sent => { // 'sent' is that message you just sent
-		const collector = new Discord.MessageCollector(msg.channel, m => m.author.id === msg.author.id, { time: 30000 });
+		const collector = new MessageCollector(msg.channel, m => m.author.id === msg.author.id, { time: 30000 });
 
 		collector.on('collect', message => {
 			if(!message.content.includes("cancel"))
@@ -664,9 +700,11 @@ async function addQuote(msg)
 			{
 				msg.reply("Okay :)");
 			}
-			sent.delete();
-			message.delete();
-			msg.delete();
+			sent.delete().catch();;
+			try{
+				message.delete().catch();;
+				msg.delete().catch();;
+			} catch{}
 			collector.stop();
 		})
 	});
@@ -724,7 +762,11 @@ function hug(message)
 	mention = getMention(message);
 	if (!mention) return;
 	message.channel.send("The coop sends their virtual hugs <@"+mention+"> <:FowlHeart:713701989707546634>");
-	message.delete();
+	try
+	{
+		message.delete().catch();;
+	} catch{}
+
 
 }
 function cluck(message)
@@ -734,8 +776,9 @@ function cluck(message)
 	if(message.channel.id!="729842480199106591") return;
 	if (!mention) return;
 	message.channel.send("_Every chicken in the coop turns and stares at <@"+mention+"> as the Rooster himself waddles over Cluck cluck gets even closer Buk?_\n\n(The chickens are confused as this channel is for stupid chicken role play only for a joke and not general human speak)");
-	message.delete();
-
+	try{
+		message.delete().catch();;
+	} catch{}
 }
 function NavySeal(msg)
 {
@@ -797,8 +840,6 @@ function messageReceived(msg)
 	console.log("Points: "+points);
 	let sql = require("./sql.js");
 
-	sql.debug = debug;
-	;
 	sql.run(
 		"INSERT INTO  fowl_levels (user_id,points) VALUES(\""+msg.author.id+"\","+points+") ON DUPLICATE KEY UPDATE points=points+"+points+";"
 	);

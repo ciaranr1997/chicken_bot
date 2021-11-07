@@ -3,6 +3,8 @@ var https = require('https');
 const express = require('express');
 const app = express();
 app.enable('trust proxy',["127.0.0.1:8001","127.0.0.1","http://localhost:8001","http://localhost"]);
+app.enable('trust proxy');
+const bodyParser = require('body-parser');
 const session = require("express-session");
 const passport = require("passport");
 const authRoute = require('./routes/auth');
@@ -14,11 +16,32 @@ const leaderRoute = require('./routes/leaderboard');
 const twitchRoute = require('./routes/twitch');
 const userRoute = require('./routes/user');
 const testRoute = require('./routes/testing');
+const bingoMonitor = require('./routes/bmonitor');
+const guessMonitor = require('./routes/guessmonitor');
+const twitchWebhooks = require('./endpoints/twitchwebhook');
+const twitchExtension = require('./routes/twitchextension');
+const redemptionMonitor = require('./routes/redemptionmonitor');
 const requestRoute = require('./requests');
 const DiscordStrategy = require('./strategies/discordstrategy.js');
 const config = require('../config.json');
 var test = "test";
+const store = {};
+const tmi = require('tmi.js');
+const opts = {
+  identity: {
+    username: config.twitch.bot_username,
+    password: config.twitch.bot_oauth
+  },
+  channels: [
+    "fowl_play_gaming"
+  ]
+};
 
+var MySQLStore = require('connect-mysql')(session); // mysql session store
+
+process.env.twitch = "";
+var tmiClient = new tmi.client(opts);
+tmiClient.connect();
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -28,12 +51,33 @@ app.use(session({
 	cookie: {
 		maxAge: 60000*60*24
 	},
-	saveUninitialized: false
+	saveUninitialized: true,
+	store: new MySQLStore(options = {
+		pool: true,
+		 config: config.mysql
+	})
 }));
+
+app.use(bodyParser.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf
+  }
+}))
+const cors = require('cors');
+app.use(cors());
 app.use(passport.initialize());
 app.use(passport.session());
 
 //IMPORTANT PAGES - these can ignore the auth redirect
+const server = app.listen(8001, () => {
+  console.log(`Express running → PORT ${server.address().port}`);
+	var twitch = require("../twitch.js");
+	twitch.getToken();
+
+	//twitch.checkToken(process.env.twitch);
+});
+const io = require("socket.io")(server);
+
 
 app.use('/scorecard',scoreRoute);
 app.use('/static', express.static('assets'))
@@ -41,6 +85,14 @@ app.use('/auth',authRoute);
 app.use('/admin',adminRoute);
 app.use('/requests',requestRoute);
 app.use('/tests',testRoute);
+app.use('/rfnotsdyny',bingoMonitor);
+app.use('/kzrvyrnaew',guessMonitor);
+app.use('/twitchextension',twitchExtension);
+app.use('/nrbuihpfrplxzamfuyjf/tllxnonyrjcxqoivrbcv',twitchWebhooks);
+app.use('/7ac2rxoorj/1b1kcyf70v',redemptionMonitor);
+
+
+
 
 
 app.get('/error', (req, res) => {
@@ -58,6 +110,49 @@ app.get('/error', (req, res) => {
 });
 
 
+io.of("/bingosocket").on('connect', function(socket) {
+
+		store[socket.id] = {
+	    socket : socket,
+	    data   : null
+	  }
+
+	socket.emit("chat",{"Test":"test"});
+	socket.on('message', function(message) {
+	  console.log(message);
+	});
+});
+io.of("/redemptionsocket").on('connect', function(socket) {
+
+		store[socket.id] = {
+	    socket : socket,
+	    data   : null
+	  }
+
+	socket.emit("confirm",{"Test":"test"});
+	socket.on('message', function(message) {
+	  console.log(message);
+	});
+});
+
+app.set('socketio', io);
+app.set("tmiClient",tmiClient)
+app.get('/socks', (req, res) => {
+
+	io.of("/bingosocket").emit("bingo",{"user":"ciaranr1997","type":"full house!"});
+
+	res.writeHead(200, {'Content-Type': 'text/html'});
+	html = "test";
+	res.end(html);
+});
+app.get('/socks2', (req, res) => {
+	io.sockets.emit('hello');
+	console.log("Socks");
+
+	res.writeHead(200, {'Content-Type': 'text/html'});
+	html = "<script src='https://cdn.socket.io/4.1.2/socket.io.min.js'></script><script>var socket = io.connect('http://localhost:8001/bingosocket');socket.on('message', function (message) {console.log(message);});socket.on('chat', function (data) {console.log(data);});</script>";
+	res.end(html);
+});
 app.get('/login', (req, res) => {
 	if(req.hostname!="localhost"&&req.hostname!="chickenbot.xyz")
 	{
@@ -142,13 +237,6 @@ app.use('/leaderboard',leaderRoute);
 
 
 
-const server = app.listen(8001, () => {
-  console.log(`Express running → PORT ${server.address().port}`);
-	var twitch = require("../twitch.js");
-	twitch.getToken();
-
-	//twitch.checkToken(process.env.twitch);
-});
 
 //https.createServer(options, app).listen(3443);
 passport.serializeUser(function(user, done) {
